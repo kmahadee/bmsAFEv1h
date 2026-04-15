@@ -1,0 +1,263 @@
+<div class="branch-create-container">
+  <div class="page-header">
+    <h1>Create New Branch</h1>
+    <p class="subtitle">Add a new branch to your banking network</p>
+  </div>
+
+  <div class="alert alert-success" *ngIf="success">
+    <i class="icon-check"></i>
+    {{ success }}
+  </div>
+
+  <div class="alert alert-error" *ngIf="error">
+    <i class="icon-error"></i>
+    {{ error }}
+  </div>
+
+  <form [formGroup]="branchForm" (ngSubmit)="onSubmit()" class="branch-form">
+    
+    <!-- Basic Information Section -->
+    <div class="form-section">
+      <h2 class="section-title">Basic Information</h2>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="branchName">Branch Name <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="branchName" 
+            formControlName="branchName"
+            class="form-control"
+            [class.is-invalid]="submitted && f['branchName'].errors"
+            placeholder="Enter branch name">
+          <div class="error-message" *ngIf="submitted && f['branchName'].errors">
+            <span *ngIf="f['branchName'].errors['required']">Branch name is required</span>
+            <span *ngIf="f['branchName'].errors['minlength']">Branch name must be at least 3 characters</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="isMainBranch">Main Branch</label>
+          <div class="checkbox-wrapper">
+            <input 
+              type="checkbox" 
+              id="isMainBranch" 
+              formControlName="isMainBranch">
+            <label for="isMainBranch" class="checkbox-label">This is a main branch</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Address Section -->
+    <div class="form-section">
+      <h2 class="section-title">Address Details</h2>
+      
+      <div class="form-row">
+        <div class="form-group full-width">
+          <label for="address">Street Address <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="address" 
+            formControlName="address"
+            class="form-control"
+            [class.is-invalid]="submitted && f['address'].errors"
+            placeholder="Enter street address">
+          <div class="error-message" *ngIf="submitted && f['address'].errors">
+            <span *ngIf="f['address'].errors['required']">Address is required</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="city">City <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="city" 
+            formControlName="city"
+            class="form-control"
+            [class.is-invalid]="submitted && f['city'].errors"
+            placeholder="Enter city">
+          <div class="error-message" *ngIf="submitted && f['city'].errors">
+            <span *ngIf="f['city'].errors['required']">City is required</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="state">State <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="state" 
+            formControlName="state"
+            class="form-control"
+            [class.is-invalid]="submitted && f['state'].errors"
+            placeholder="Enter state">
+          <div class="error-message" *ngIf="submitted && f['state'].errors">
+            <span *ngIf="f['state'].errors['required']">State is required</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="zipCode">ZIP Code <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="zipCode" 
+            formControlName="zipCode"
+            class="form-control"
+            [class.is-invalid]="submitted && f['zipCode'].errors"
+            placeholder="Enter ZIP code">
+          <div class="error-message" *ngIf="submitted && f['zipCode'].errors">
+            <span *ngIf="f['zipCode'].errors['required']">ZIP code is required</span>
+            <span *ngIf="f['zipCode'].errors['pattern']">Invalid ZIP code format</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact Information Section -->
+    <div class="form-section">
+      <h2 class="section-title">Contact Information</h2>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="phone">Phone Number <span class="required">*</span></label>
+          <input 
+            type="tel" 
+            id="phone" 
+            formControlName="phone"
+            class="form-control"
+            [class.is-invalid]="submitted && f['phone'].errors"
+            placeholder="+1234567890">
+          <div class="error-message" *ngIf="submitted && f['phone'].errors">
+            <span *ngIf="f['phone'].errors['required']">Phone number is required</span>
+            <span *ngIf="f['phone'].errors['pattern']">Invalid phone number format</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email Address <span class="required">*</span></label>
+          <input 
+            type="email" 
+            id="email" 
+            formControlName="email"
+            class="form-control"
+            [class.is-invalid]="submitted && f['email'].errors"
+            placeholder="branch@example.com">
+          <div class="error-message" *ngIf="submitted && f['email'].errors">
+            <span *ngIf="f['email'].errors['required']">Email is required</span>
+            <span *ngIf="f['email'].errors['email']">Invalid email format</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="workingHours">Working Hours</label>
+          <input 
+            type="text" 
+            id="workingHours" 
+            formControlName="workingHours"
+            class="form-control"
+            placeholder="Mon-Fri: 9AM-5PM">
+        </div>
+      </div>
+    </div>
+
+    <!-- Manager Information Section -->
+    <div class="form-section">
+      <h2 class="section-title">Manager Information</h2>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="managerName">Manager Name</label>
+          <input 
+            type="text" 
+            id="managerName" 
+            formControlName="managerName"
+            class="form-control"
+            placeholder="Enter manager name">
+        </div>
+
+        <div class="form-group">
+          <label for="managerPhone">Manager Phone</label>
+          <input 
+            type="tel" 
+            id="managerPhone" 
+            formControlName="managerPhone"
+            class="form-control"
+            [class.is-invalid]="submitted && f['managerPhone'].errors"
+            placeholder="+1234567890">
+          <div class="error-message" *ngIf="submitted && f['managerPhone'].errors">
+            <span *ngIf="f['managerPhone'].errors['pattern']">Invalid phone number format</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="managerEmail">Manager Email</label>
+          <input 
+            type="email" 
+            id="managerEmail" 
+            formControlName="managerEmail"
+            class="form-control"
+            [class.is-invalid]="submitted && f['managerEmail'].errors"
+            placeholder="manager@example.com">
+          <div class="error-message" *ngIf="submitted && f['managerEmail'].errors">
+            <span *ngIf="f['managerEmail'].errors['email']">Invalid email format</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Banking Codes Section -->
+    <div class="form-section">
+      <h2 class="section-title">Banking Codes</h2>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="ifscCode">IFSC Code <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="ifscCode" 
+            formControlName="ifscCode"
+            class="form-control"
+            [class.is-invalid]="submitted && f['ifscCode'].errors"
+            placeholder="ABCD0123456"
+            maxlength="11">
+          <div class="error-message" *ngIf="submitted && f['ifscCode'].errors">
+            <span *ngIf="f['ifscCode'].errors['required']">IFSC code is required</span>
+            <span *ngIf="f['ifscCode'].errors['pattern']">Invalid IFSC code format (e.g., ABCD0123456)</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="swiftCode">SWIFT Code</label>
+          <input 
+            type="text" 
+            id="swiftCode" 
+            formControlName="swiftCode"
+            class="form-control"
+            placeholder="ABCDUS33XXX">
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button 
+        type="button" 
+        class="btn btn-secondary" 
+        (click)="cancel()"
+        [disabled]="loading">
+        Cancel
+      </button>
+      <button 
+        type="submit" 
+        class="btn btn-primary" 
+        [disabled]="loading">
+        <span *ngIf="!loading">Create Branch</span>
+        <span *ngIf="loading" class="loading-spinner">
+          <i class="spinner"></i> Creating...
+        </span>
+      </button>
+    </div>
+  </form>
+</div>

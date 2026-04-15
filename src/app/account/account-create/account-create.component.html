@@ -1,0 +1,404 @@
+<div class="account-create-container">
+  <div class="page-header">
+    <h1>Create New Account</h1>
+    <p class="subtitle">Open a new bank account for a customer</p>
+  </div>
+
+  <div class="alert alert-success" *ngIf="success">
+    <i class="icon-check"></i>
+    {{ success }}
+  </div>
+
+  <div class="alert alert-error" *ngIf="error">
+    <i class="icon-error"></i>
+    {{ error }}
+  </div>
+  <div class="container">
+    <form [formGroup]="accountForm" (ngSubmit)="onSubmit()" class="account-form">
+
+
+      <div class="form-section">
+        <h2 class="section-title">Customer & Account Information</h2>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="customerId">Customer ID <span class="required">*</span></label>
+            <!-- <input 
+            type="text" 
+            id="customerId" 
+            formControlName="customerId"
+            class="form-control"
+            [class.is-invalid]="submitted && f['customerId'].errors"
+            placeholder="Enter customer ID"> -->
+            <select class="form-select" id="customerId" formControlName="customerId"
+              [class.is-invalid]="submitted && f['customerId'].errors">
+              <option value="">Select Customer</option>
+              <option *ngFor="let customer of customers" [value]="customer.customerId">
+                {{ customer.customerId }} - {{ customer.firstName }} {{ customer.lastName }}
+              </option>
+            </select>
+            <div class="error-message" *ngIf="submitted && f['customerId'].errors">
+              <span *ngIf="f['customerId'].errors['required']">Customer ID is required</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="accountType">Account Type <span class="required">*</span></label>
+            <select id="accountType" formControlName="accountType" class="form-control"
+              [class.is-invalid]="submitted && f['accountType'].errors">
+              <option *ngFor="let type of accountTypes" [value]="type.value">
+                {{ type.label }}
+              </option>
+            </select>
+            <div class="error-message" *ngIf="submitted && f['accountType'].errors">
+              <span *ngIf="f['accountType'].errors['required']">Account type is required</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="branchCode">Branch <span class="required">*</span></label>
+            <select id="branchCode" formControlName="branchCode" class="form-control"
+              [class.is-invalid]="submitted && f['branchCode'].errors">
+              <option value="">Select a branch</option>
+              <option *ngFor="let branch of branches$ | async" [value]="branch.branchCode">
+                {{ branch.branchName }} - {{ branch.branchCode }} ({{ branch.city }})
+              </option>
+            </select>
+            <div class="error-message" *ngIf="submitted && f['branchCode'].errors">
+              <span *ngIf="f['branchCode'].errors['required']">Branch is required</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="currency">Currency <span class="required">*</span></label>
+            <select id="currency" formControlName="currency" class="form-control"
+              [class.is-invalid]="submitted && f['currency'].errors">
+              <option *ngFor="let curr of currencies" [value]="curr.value">
+                {{ curr.label }}
+              </option>
+            </select>
+            <div class="error-message" *ngIf="submitted && f['currency'].errors">
+              <span *ngIf="f['currency'].errors['required']">Currency is required</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="form-section">
+        <h2 class="section-title">Financial Details</h2>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="balance">Initial Balance <span class="required">*</span></label>
+            <input type="number" id="balance" formControlName="balance" class="form-control"
+              [class.is-invalid]="submitted && f['balance'].errors" placeholder="0.00" step="0.01">
+            <div class="error-message" *ngIf="submitted && f['balance'].errors">
+              <span *ngIf="f['balance'].errors['required']">Initial balance is required</span>
+              <span *ngIf="f['balance'].errors['min']">Balance cannot be negative</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="interestRate">Interest Rate (%) <span class="required">*</span></label>
+            <input type="number" id="interestRate" formControlName="interestRate" class="form-control"
+              [class.is-invalid]="submitted && f['interestRate'].errors" placeholder="0.00" step="0.01" min="0"
+              max="100">
+            <div class="error-message" *ngIf="submitted && f['interestRate'].errors">
+              <span *ngIf="f['interestRate'].errors['required']">Interest rate is required</span>
+              <span *ngIf="f['interestRate'].errors['min']">Interest rate cannot be negative</span>
+              <span *ngIf="f['interestRate'].errors['max']">Interest rate cannot exceed 100%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="form-section">
+        <h2 class="section-title">Nominee Information (Optional)</h2>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="nomineeFirstName">Nominee First Name</label>
+            <input type="text" id="nomineeFirstName" formControlName="nomineeFirstName" class="form-control"
+              placeholder="Enter first name">
+          </div>
+
+          <div class="form-group">
+            <label for="nomineeLastName">Nominee Last Name</label>
+            <input type="text" id="nomineeLastName" formControlName="nomineeLastName" class="form-control"
+              placeholder="Enter last name">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="nomineeRelationship">Relationship</label>
+            <input type="text" id="nomineeRelationship" formControlName="nomineeRelationship" class="form-control"
+              placeholder="e.g., Spouse, Child, Parent">
+          </div>
+
+          <div class="form-group">
+            <label for="nomineePhone">Nominee Phone</label>
+            <input type="tel" id="nomineePhone" formControlName="nomineePhone" class="form-control"
+              [class.is-invalid]="submitted && f['nomineePhone'].errors" placeholder="+1234567890">
+            <div class="error-message" *ngIf="submitted && f['nomineePhone'].errors">
+              <span *ngIf="f['nomineePhone'].errors['pattern']">Invalid phone number format</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="loading">
+          Cancel
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="loading">
+          <span *ngIf="!loading">Create Account</span>
+          <span *ngIf="loading" class="loading-spinner">
+            <i class="spinner"></i> Creating...
+          </span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 
+<div class="account-create-container">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+
+        <div class="mb-4">
+          <button class="btn btn-outline-secondary btn-sm me-3" (click)="cancel()">
+            <i class="bi bi-arrow-left me-2"></i>
+            Back
+          </button>
+          <h2 class="d-inline mb-0">
+            <i class="bi bi-plus-circle text-primary me-2"></i>
+            Create New Account
+          </h2>
+        </div>
+
+        
+        <div class="alert alert-success alert-dismissible fade show" role="alert" *ngIf="success">
+          <i class="bi bi-check-circle me-2"></i>
+          {{ success }}
+        </div>
+
+        
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" *ngIf="error">
+          <i class="bi bi-exclamation-circle me-2"></i>
+          {{ error }}
+          <button type="button" class="btn-close" (click)="error = ''"></button>
+        </div>
+
+        
+        <div class="card">
+          <div class="card-body p-4">
+            <form [formGroup]="accountForm" (ngSubmit)="onSubmit()">
+        
+              <h5 class="mb-3">
+                <i class="bi bi-wallet2 me-2"></i>
+                Account Information
+              </h5>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="customerId" class="form-label">Customer *</label>
+                  <select
+                    class="form-select"
+                    id="customerId"
+                    formControlName="customerId"
+                    [class.is-invalid]="submitted && f['customerId'].errors"
+                  >
+                    <option value="">Select Customer</option>
+                    <option *ngFor="let customer of customers" [value]="customer.customerId">
+                      {{ customer.customerId }} - {{ customer.firstName }} {{ customer.lastName }}
+                    </option>
+                  </select>
+                  <div class="invalid-feedback" *ngIf="submitted && f['customerId'].errors">
+                    Customer is required
+                  </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <label for="accountType" class="form-label">Account Type *</label>
+                  <select
+                    class="form-select"
+                    id="accountType"
+                    formControlName="accountType"
+                    [class.is-invalid]="submitted && f['accountType'].errors"
+                  >
+                    <option value="">Select Type</option>
+                    <option *ngFor="let type of accountTypes" [value]="type">
+                      {{ type }}
+                    </option>
+                  </select>
+                  <div class="invalid-feedback" *ngIf="submitted && f['accountType'].errors">
+                    Account type is required
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-4 mb-3">
+                  <label for="branch" class="form-label">Branch *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="branch"
+                    formControlName="branch"
+                    placeholder="Main Branch"
+                    [class.is-invalid]="submitted && f['branch'].errors"
+                  />
+                  <div class="invalid-feedback" *ngIf="submitted && f['branch'].errors">
+                    Branch is required
+                  </div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                  <label for="balance" class="form-label">Initial Balance *</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="balance"
+                    formControlName="balance"
+                    placeholder="0.00"
+                    [class.is-invalid]="submitted && f['balance'].errors"
+                  />
+                  <div class="invalid-feedback" *ngIf="submitted && f['balance'].errors">
+                    <div *ngIf="f['balance'].errors['required']">Balance is required</div>
+                    <div *ngIf="f['balance'].errors['min']">Balance cannot be negative</div>
+                  </div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                  <label for="currency" class="form-label">Currency *</label>
+                  <select
+                    class="form-select"
+                    id="currency"
+                    formControlName="currency"
+                    [class.is-invalid]="submitted && f['currency'].errors"
+                  >
+                    <option *ngFor="let curr of currencies" [value]="curr">
+                      {{ curr }}
+                    </option>
+                  </select>
+                  <div class="invalid-feedback" *ngIf="submitted && f['currency'].errors">
+                    Currency is required
+                  </div>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="interestRate" class="form-label">Interest Rate (%) *</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="interestRate"
+                  formControlName="interestRate"
+                  placeholder="0.00"
+                  step="0.01"
+                  [class.is-invalid]="submitted && f['interestRate'].errors"
+                />
+                <div class="invalid-feedback" *ngIf="submitted && f['interestRate'].errors">
+                  <div *ngIf="f['interestRate'].errors['required']">Interest rate is required</div>
+                  <div *ngIf="f['interestRate'].errors['min']">Interest rate cannot be negative</div>
+                  <div *ngIf="f['interestRate'].errors['max']">Interest rate cannot exceed 100%</div>
+                </div>
+              </div>
+
+              
+              <h5 class="mb-3 mt-4">
+                <i class="bi bi-people me-2"></i>
+                Nominee Information (Optional)
+              </h5>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="nomineeFirstName" class="form-label">Nominee First Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="nomineeFirstName"
+                    formControlName="nomineeFirstName"
+                  />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <label for="nomineeLastName" class="form-label">Nominee Last Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="nomineeLastName"
+                    formControlName="nomineeLastName"
+                  />
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="nomineeRelationship" class="form-label">Relationship</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="nomineeRelationship"
+                    formControlName="nomineeRelationship"
+                    placeholder="e.g., Spouse, Child"
+                  />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <label for="nomineePhone" class="form-label">Nominee Phone</label>
+                  <input
+                    type="tel"
+                    class="form-control"
+                    id="nomineePhone"
+                    formControlName="nomineePhone"
+                  />
+                </div>
+              </div>
+
+              
+              <div class="d-flex justify-content-end gap-2 mt-4">
+                <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="loading">
+                  Cancel
+                </button>
+                <button type="submit" class="btn btn-primary" [disabled]="loading">
+                  <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+                  <i *ngIf="!loading" class="bi bi-save me-2"></i>
+                  {{ loading ? 'Creating...' : 'Create Account' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> -->

@@ -1,0 +1,124 @@
+<div class="loan-summary-card card shadow" *ngIf="loan">
+    <div class="card-header bg-gradient text-white">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-0">
+                    <i class="bi bi-file-earmark-text me-2"></i>
+                    {{ formatLoanType(loan.loanType) }}
+                </h5>
+                <small class="opacity-75">Loan ID: {{ loan.loanId }}</small>
+            </div>
+            <app-loan-status-badge [status]="loan.loanStatus" [type]="'loan'" [size]="'md'">
+            </app-loan-status-badge>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <!-- Primary Amount Display -->
+        <div class="primary-amounts row g-3 mb-4">
+            <div class="col-md-6">
+                <div class="amount-box p-3 border rounded bg-light">
+                    <small class="text-muted d-block mb-1">Principal Amount</small>
+                    <h4 class="mb-0 text-primary">{{ formatAmount(loan.principal) }}</h4>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="amount-box p-3 border rounded bg-light">
+                    <small class="text-muted d-block mb-1">Outstanding Balance</small>
+                    <h4 class="mb-0 text-danger">{{ formatAmount(loan.outstandingBalance) }}</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Repayment Progress -->
+        <div class="repayment-progress mb-4">
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted">Repayment Progress</span>
+                <strong>{{ repaymentProgress }}%</strong>
+            </div>
+            <div class="progress" style="height: 20px;">
+                <div class="progress-bar" [ngClass]="getProgressBarClass()" role="progressbar"
+                    [style.width.%]="repaymentProgress" [attr.aria-valuenow]="repaymentProgress" aria-valuemin="0"
+                    aria-valuemax="100">
+                    {{ formatAmount(totalPaid) }} paid
+                </div>
+            </div>
+        </div><!-- Loan Details Grid -->
+        <div class="loan-details-grid" *ngIf="showFullDetails">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="detail-item">
+                        <i class="bi bi-percent text-primary me-2"></i>
+                        <div>
+                            <small class="text-muted d-block">Interest Rate</small>
+                            <strong>{{ loan.annualInterestRate }}% p.a.</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-item">
+                        <i class="bi bi-calendar3 text-primary me-2"></i>
+                        <div>
+                            <small class="text-muted d-block">Tenure</small>
+                            <strong>{{ loan.tenureMonths }} months</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-item">
+                        <i class="bi bi-cash-stack text-primary me-2"></i>
+                        <div>
+                            <small class="text-muted d-block">Monthly EMI</small>
+                            <strong>{{ formatAmount(loan.monthlyEMI) }}</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-item">
+                        <i class="bi bi-calculator text-primary me-2"></i>
+                        <div>
+                            <small class="text-muted d-block">Total Amount</small>
+                            <strong>{{ formatAmount(loan.totalAmount) }}</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-item">
+                        <i class="bi bi-graph-up text-warning me-2"></i>
+                        <div>
+                            <small class="text-muted d-block">Total Interest</small>
+                            <strong class="text-warning">{{ formatAmount(loan.totalInterest) }}</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-item">
+                        <i class="bi bi-calendar-check text-success me-2"></i>
+                        <div>
+                            <small class="text-muted d-block">Application Date</small>
+                            <strong>{{ loan.applicationDate | date: 'dd MMM yyyy' }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Info -->
+        <div class="additional-info mt-4" *ngIf="showFullDetails">
+            <div class="row g-2">
+                <div class="col-md-4">
+                    <small class="text-muted d-block">Customer</small>
+                    <strong>{{ loan.customerName }}</strong>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted d-block">Account</small>
+                    <strong>{{ loan.accountNumber }}</strong>
+                </div>
+                <div class="col-md-4" *ngIf="loan.creditScore">
+                    <small class="text-muted d-block">Credit Score</small>
+                    <strong class="text-info">{{ loan.creditScore }}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

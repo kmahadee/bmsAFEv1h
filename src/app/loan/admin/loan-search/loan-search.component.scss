@@ -1,0 +1,110 @@
+// Custom Variables
+$primary-color: #4e73df;
+$secondary-color: #858796;
+$success-color: #1cc88a;
+$info-color: #36b9cc;
+$warning-color: #f6c23e;
+$danger-color: #e74a3b;
+$bg-light: #f8f9fc;
+
+:host {
+  display: block;
+  background-color: $bg-light;
+  min-height: 100vh;
+}
+
+// Card Styles
+.filter-card {
+  border-left: 4px solid $primary-color;
+}
+
+// Avatar Styles
+.avatar-circle {
+  width: 35px;
+  height: 35px;
+  background: linear-gradient(135deg, $primary-color, $info-color);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.85rem;
+}
+
+// Table Styling
+.table {
+  thead th {
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-top: none;
+  }
+  
+  tbody tr {
+    transition: all 0.2s ease;
+    &:hover {
+      background-color: rgba($primary-color, 0.03);
+      cursor: pointer;
+    }
+  }
+}
+
+// Action Buttons
+.btn-icon {
+  background: transparent;
+  border: none;
+  color: $secondary-color;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  &:hover {
+    background-color: #eaecf4;
+    color: $primary-color;
+  }
+}
+
+// Pagination Customization
+.pagination {
+  .page-link {
+    border: none;
+    margin: 0 3px;
+    border-radius: 5px !important;
+    color: $secondary-color;
+    &:hover {
+      background-color: #eaecf4;
+    }
+  }
+  .page-item.active .page-link {
+    background-color: $primary-color;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  }
+}
+
+// Animations
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+.animate-row {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+// Form Control refinements
+.form-control, .form-select {
+  border: 1px solid #d1d3e2;
+  &:focus {
+    border-color: lighten($primary-color, 20%);
+    box-shadow: 0 0 0 0.2rem rgba($primary-color, 0.25);
+  }
+}

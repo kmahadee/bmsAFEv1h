@@ -1,0 +1,67 @@
+.loan-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .card-body {
+    padding: 1.5rem;
+  }
+
+  .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
+  }
+
+  .customer-info {
+    padding: 0.75rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border-left: 3px solid #007bff;
+  }
+
+  .loan-amount {
+    h6 {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+  }
+
+  .progress {
+    border-radius: 10px;
+    background-color: #e9ecef;
+    overflow: hidden;
+
+    .progress-bar {
+      border-radius: 10px;
+      transition: width 0.6s ease;
+    }
+  }
+
+  .status-badges {
+    .badge {
+      font-size: 0.75rem;
+      padding: 0.4rem 0.8rem;
+      font-weight: 500;
+    }
+  }
+
+  .card-actions {
+    .btn-group {
+      .btn {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.75rem;
+        
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
+}

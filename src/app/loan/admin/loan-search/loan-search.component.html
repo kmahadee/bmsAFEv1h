@@ -1,0 +1,349 @@
+<div class="loan-search-container">
+  <!-- Header Section -->
+  <div class="search-header mb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap">
+      <div class="mb-3 mb-md-0">
+        <h2 class="mb-1">
+          <i class="bi bi-search me-2"></i>
+          Search Loans
+        </h2>
+        <p class="text-muted mb-0">Search and filter loan applications with advanced criteria</p>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline-secondary" (click)="refresh()" [disabled]="loading">
+          <i class="bi bi-arrow-clockwise me-1"></i>
+          Refresh
+        </button>
+        <button class="btn btn-success" (click)="exportToCSV()" [disabled]="filteredLoans.length === 0">
+          <i class="bi bi-file-earmark-spreadsheet me-1"></i>
+          Export CSV
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search Filters Card -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-primary bg-opacity-10 border-0 py-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 text-primary">
+          <i class="bi bi-funnel me-2"></i>
+          Search Filters
+        </h5>
+        <span class="badge bg-primary" *ngIf="hasActiveFilters()">
+          <i class="bi bi-funnel-fill me-1"></i>
+          Filters Active
+        </span>
+      </div>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="searchForm">
+        <div class="row g-3">
+          <!-- Customer ID Search -->
+          <div class="col-md-6 col-lg-3">
+            <label for="customerId" class="form-label">
+              <i class="bi bi-person me-1"></i>
+              Customer ID / Name
+            </label>
+            <input 
+              type="text" 
+              class="form-control" 
+              id="customerId"
+              formControlName="customerId"
+              placeholder="Search by ID or name..."
+            >
+            <small class="text-muted">Search by customer ID or name</small>
+          </div>
+
+          <!-- Loan Type Filter -->
+          <div class="col-md-6 col-lg-3">
+            <label for="loanType" class="form-label">
+              <i class="bi bi-tag me-1"></i>
+              Loan Type
+            </label>
+            <select class="form-select" id="loanType" formControlName="loanType">
+              <option value="">All Types</option>
+              <option *ngFor="let type of loanTypes" [value]="type.value">
+                {{ type.label }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Loan Status Filter -->
+          <div class="col-md-6 col-lg-3">
+            <label for="loanStatus" class="form-label">
+              <i class="bi bi-flag me-1"></i>
+              Loan Status
+            </label>
+            <select class="form-select" id="loanStatus" formControlName="loanStatus">
+              <option value="">All Statuses</option>
+              <option *ngFor="let status of loanStatuses" [value]="status.value">
+                {{ status.label }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Page Size -->
+          <div class="col-md-6 col-lg-3">
+            <label for="pageSize" class="form-label">
+              <i class="bi bi-list-ol me-1"></i>
+              Results Per Page
+            </label>
+            <select class="form-select" id="pageSize" formControlName="pageSize">
+              <option [value]="10">10 per page</option>
+              <option [value]="20">20 per page</option>
+              <option [value]="50">50 per page</option>
+              <option [value]="100">100 per page</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Reset Button -->
+        <div class="row mt-3" *ngIf="hasActiveFilters()">
+          <div class="col-12">
+            <button type="button" class="btn btn-outline-danger btn-sm" (click)="resetFilters()">
+              <i class="bi bi-x-circle me-1"></i>
+              Clear All Filters
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Statistics Summary -->
+  <div class="card border-0 shadow-sm mb-4" *ngIf="filteredLoans.length > 0">
+    <div class="card-body">
+      <div class="row g-3 text-center">
+        <div class="col-6 col-md-3 col-lg">
+          <div class="stat-item">
+            <i class="bi bi-file-text text-primary fs-3"></i>
+            <h4 class="mb-0 mt-2 fw-bold">{{ getFilteredStatistics().totalLoans }}</h4>
+            <small class="text-muted">Total Loans</small>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 col-lg">
+          <div class="stat-item">
+            <i class="bi bi-wallet2 text-success fs-3"></i>
+            <h4 class="mb-0 mt-2 fw-bold">{{ formatAmount(getFilteredStatistics().totalPrincipal) }}</h4>
+            <small class="text-muted">Total Principal</small>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 col-lg">
+          <div class="stat-item">
+            <i class="bi bi-exclamation-circle text-danger fs-3"></i>
+            <h4 class="mb-0 mt-2 fw-bold">{{ formatAmount(getFilteredStatistics().totalOutstanding) }}</h4>
+            <small class="text-muted">Outstanding</small>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 col-lg">
+          <div class="stat-item">
+            <i class="bi bi-check-circle text-info fs-3"></i>
+            <h4 class="mb-0 mt-2 fw-bold">{{ getFilteredStatistics().activeLoans }}</h4>
+            <small class="text-muted">Active Loans</small>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 col-lg">
+          <div class="stat-item">
+            <i class="bi bi-clock-history text-warning fs-3"></i>
+            <h4 class="mb-0 mt-2 fw-bold">{{ getFilteredStatistics().pendingApprovals }}</h4>
+            <small class="text-muted">Pending</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-3 text-muted">Loading loans...</p>
+  </div>
+
+  <!-- Error Alert -->
+  <div *ngIf="error && !loading" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    {{ error }}
+    <button type="button" class="btn-close" (click)="error = null"></button>
+  </div>
+
+  <!-- Results Section -->
+  <div *ngIf="!loading && !error">
+    
+    <!-- Results Header -->
+    <div class="d-flex justify-content-between align-items-center mb-3" *ngIf="filteredLoans.length > 0">
+      <div>
+        <h5 class="mb-0">
+          Search Results 
+          <span class="badge bg-primary ms-2">{{ totalCount }} loans found</span>
+        </h5>
+        <small class="text-muted">
+          Showing {{ (currentPage - 1) * pageSize + 1 }} - 
+          {{ Math.min(currentPage * pageSize, totalCount) }} of {{ totalCount }}
+        </small>
+      </div>
+    </div>
+
+    <!-- Results Table -->
+    <div class="card border-0 shadow-sm" *ngIf="loans.length > 0; else noResults">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th class="px-3">Loan ID</th>
+                <th>Customer</th>
+                <th>Type</th>
+                <th>Principal</th>
+                <th>Outstanding</th>
+                <th>EMI</th>
+                <th>Status</th>
+                <th>Approval</th>
+                <th>Date</th>
+                <th class="text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let loan of loans">
+                <td class="px-3">
+                  <span class="fw-bold text-primary">{{ loan.loanId }}</span>
+                </td>
+                <td>
+                  <div>
+                    <div class="fw-medium">{{ loan.customerName }}</div>
+                    <small class="text-muted">{{ loan.customerId }}</small>
+                  </div>
+                </td>
+                <td>
+                  <span class="badge bg-secondary">
+                    {{ formatLoanType(loan.loanType) }}
+                  </span>
+                </td>
+                <td class="fw-bold text-success">
+                  {{ formatAmount(loan.principal) }}
+                </td>
+                <td class="fw-bold text-danger">
+                  {{ formatAmount(loan.outstandingBalance) }}
+                </td>
+                <td class="fw-medium">
+                  {{ formatAmount(loan.monthlyEMI) }}
+                </td>
+                <td>
+                  <span class="badge" [ngClass]="getLoanStatusBadgeClass(loan.loanStatus)">
+                    {{ loan.loanStatus }}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge" [ngClass]="getApprovalStatusBadgeClass(loan.approvalStatus)">
+                    {{ loan.approvalStatus }}
+                  </span>
+                </td>
+                <td>
+                  <small>{{ loan.applicationDate | date:'dd/MM/yyyy' }}</small>
+                </td>
+                <td class="text-center">
+                  <div class="btn-group btn-group-sm" role="group">
+                    <button 
+                      class="btn btn-outline-primary" 
+                      (click)="viewLoanDetails(loan.loanId)"
+                      title="View Details">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                    <button 
+                      class="btn btn-outline-info" 
+                      (click)="viewLoanStatement(loan.loanId)"
+                      title="View Statement">
+                      <i class="bi bi-file-text"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="card-footer bg-white border-top" *ngIf="totalPages > 1">
+        <nav aria-label="Loan search pagination">
+          <ul class="pagination pagination-sm mb-0 justify-content-center">
+            <!-- Previous Button -->
+            <li class="page-item" [class.disabled]="currentPage === 1">
+              <button class="page-link" (click)="previousPage()" [disabled]="currentPage === 1">
+                <i class="bi bi-chevron-left"></i>
+                Previous
+              </button>
+            </li>
+
+            <!-- First Page -->
+            <li class="page-item" *ngIf="getPageNumbers()[0] > 1">
+              <button class="page-link" (click)="goToPage(1)">1</button>
+            </li>
+            <li class="page-item disabled" *ngIf="getPageNumbers()[0] > 2">
+              <span class="page-link">...</span>
+            </li>
+
+            <!-- Page Numbers -->
+            <li 
+              class="page-item" 
+              *ngFor="let page of getPageNumbers()"
+              [class.active]="page === currentPage">
+              <button class="page-link" (click)="goToPage(page)">
+                {{ page }}
+              </button>
+            </li>
+
+            <!-- Last Page -->
+            <li class="page-item disabled" *ngIf="getPageNumbers()[getPageNumbers().length - 1] < totalPages - 1">
+              <span class="page-link">...</span>
+            </li>
+            <li class="page-item" *ngIf="getPageNumbers()[getPageNumbers().length - 1] < totalPages">
+              <button class="page-link" (click)="goToPage(totalPages)">{{ totalPages }}</button>
+            </li>
+
+            <!-- Next Button -->
+            <li class="page-item" [class.disabled]="currentPage === totalPages">
+              <button class="page-link" (click)="nextPage()" [disabled]="currentPage === totalPages">
+                Next
+                <i class="bi bi-chevron-right"></i>
+              </button>
+            </li>
+          </ul>
+        </nav>
+
+        <!-- Pagination Info -->
+        <div class="text-center mt-2">
+          <small class="text-muted">
+            Page {{ currentPage }} of {{ totalPages }}
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Results -->
+    <ng-template #noResults>
+      <div class="card border-0 shadow-sm">
+        <div class="card-body text-center py-5">
+          <i class="bi bi-inbox fs-1 text-muted"></i>
+          <h5 class="mt-3 mb-2">No Loans Found</h5>
+          <p class="text-muted mb-3">
+            {{ hasActiveFilters() ? 
+              'No loans match your search criteria. Try adjusting your filters.' : 
+              'No loan applications available in the system.' 
+            }}
+          </p>
+          <button 
+            class="btn btn-primary" 
+            (click)="resetFilters()" 
+            *ngIf="hasActiveFilters()">
+            <i class="bi bi-arrow-clockwise me-1"></i>
+            Clear Filters
+          </button>
+        </div>
+      </div>
+    </ng-template>
+
+  </div>
+</div>

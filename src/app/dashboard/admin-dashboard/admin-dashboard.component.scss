@@ -1,0 +1,175 @@
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.card {
+  transition: transform 0.2s, box-shadow 0.2s;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+  }
+}
+
+.card-header {
+  h5 {
+    font-weight: 600;
+  }
+}
+
+// Stats cards styling
+.card-body {
+  h3 {
+    font-weight: 700;
+    color: #2c3e50;
+  }
+  
+  small {
+    font-size: 0.75rem;
+    
+    i {
+      margin-right: 4px;
+    }
+  }
+}
+
+// Icon containers in stats cards
+.bg-primary.bg-opacity-10,
+.bg-success.bg-opacity-10,
+.bg-info.bg-opacity-10,
+.bg-warning.bg-opacity-10,
+.bg-danger.bg-opacity-10,
+.bg-secondary.bg-opacity-10 {
+  i {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+// Chart containers
+canvas {
+  max-height: 100%;
+}
+
+// Table styling
+.table-responsive {
+  max-height: 400px;
+  overflow-y: auto;
+  
+  .table {
+    margin-bottom: 0;
+    
+    thead {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    
+    th {
+      font-weight: 600;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    tbody tr {
+      transition: background-color 0.2s;
+      
+      &:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+      }
+    }
+  }
+}
+
+// Quick action buttons
+.btn-outline-primary,
+.btn-outline-success,
+.btn-outline-info,
+.btn-outline-warning,
+.btn-outline-danger,
+.btn-outline-secondary {
+  border-width: 2px;
+  font-weight: 500;
+  padding: 1rem 0.5rem;
+  height: 100%;
+  
+  i {
+    transition: transform 0.2s;
+  }
+  
+  &:hover i {
+    transform: scale(1.1);
+  }
+}
+
+// Badge styling
+.badge {
+  font-weight: 600;
+  padding: 0.35em 0.65em;
+}
+
+// Loading spinner
+.spinner-border {
+  border-width: 0.3em;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .card-body h3 {
+    font-size: 1.5rem;
+  }
+  
+  .quick-actions .btn {
+    font-size: 0.875rem;
+    
+    i {
+      font-size: 1.5rem !important;
+    }
+  }
+}
+
+// Custom scrollbar for table
+.table-responsive {
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+    
+    &:hover {
+      background: #555;
+    }
+  }
+}
+
+// Animation for cards on load
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+// Stagger animation for multiple cards
+@for $i from 1 through 10 {
+  .row > *:nth-child(#{$i}) .card {
+    animation-delay: #{$i * 0.05}s;
+  }
+}

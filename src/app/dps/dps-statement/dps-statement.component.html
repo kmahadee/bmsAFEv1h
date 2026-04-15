@@ -1,0 +1,277 @@
+<div class="container-fluid mt-4">
+  <!-- Header -->
+  <div class="row mb-4 no-print">
+    <div class="col-md-8">
+      <button class="btn btn-link text-decoration-none p-0 mb-2" (click)="goBack()">
+        <i class="bi bi-arrow-left me-2"></i>Back to DPS Details
+      </button>
+      <h2 class="mb-0">
+        <i class="bi bi-file-text me-2"></i>
+        DPS Statement
+      </h2>
+      <p class="text-muted">Installment payment history</p>
+    </div>
+    <div class="col-md-4 text-end">
+      <button class="btn btn-outline-primary me-2" (click)="printStatement()">
+        <i class="bi bi-printer me-2"></i>
+        Print
+      </button>
+      <button class="btn btn-outline-success" (click)="downloadStatement()">
+        <i class="bi bi-download me-2"></i>
+        Download
+      </button>
+    </div>
+  </div>
+
+  <!-- Error Alert -->
+  <div *ngIf="error" class="alert alert-danger alert-dismissible fade show no-print" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    {{ error }}
+    <button type="button" class="btn-close" (click)="error = ''" aria-label="Close"></button>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2 text-muted">Loading statement...</p>
+  </div>
+
+  <!-- Statement Content -->
+  <div *ngIf="!loading && statement">
+    <!-- Statement Header -->
+    <div class="card mb-4 shadow-sm">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <h5 class="text-primary mb-3">Account Information</h5>
+            <div class="row mb-2">
+              <div class="col-sm-5 text-muted">DPS Number:</div>
+              <div class="col-sm-7"><strong>{{ statement.dpsNumber }}</strong></div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-sm-5 text-muted">Customer Name:</div>
+              <div class="col-sm-7">{{ statement.customerName }}</div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-sm-5 text-muted">Monthly Installment:</div>
+              <div class="col-sm-7">
+                <strong>{{ formatCurrency(statement.monthlyInstallment) }}</strong>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <h5 class="text-success mb-3">Payment Summary</h5>
+            <div class="row mb-2">
+              <div class="col-sm-5 text-muted">Total Installments:</div>
+              <div class="col-sm-7"><strong>{{ statement.totalInstallments }}</strong></div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-sm-5 text-muted">Paid Installments:</div>
+              <div class="col-sm-7">
+                <span class="badge bg-success">{{ statement.paidInstallments }}</span>
+              </div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-sm-5 text-muted">Pending Installments:</div>
+              <div class="col-sm-7">
+                <span class="badge bg-warning text-dark">{{ statement.pendingInstallments }}</span>
+              </div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-sm-5 text-muted">Total Deposited:</div>
+              <div class="col-sm-7">
+                <strong class="text-primary">{{ formatCurrency(statement.totalDeposited) }}</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="mt-4">
+          <div class="d-flex justify-content-between mb-2">
+            <span class="fw-bold">Payment Progress</span>
+            <span>{{ statement.paidInstallments }} / {{ statement.totalInstallments }}</span>
+          </div>
+          <div class="progress" style="height: 25px;">
+            <div 
+              class="progress-bar bg-success" 
+              role="progressbar" 
+              [style.width.%]="calculateProgress()"
+              [attr.aria-valuenow]="calculateProgress()"
+              aria-valuemin="0" 
+              aria-valuemax="100">
+              {{ calculateProgress().toFixed(1) }}%
+            </div>
+          </div>
+        </div>
+
+        <!-- Maturity Info -->
+        <div class="alert alert-info mt-3 mb-0">
+          <div class="row">
+            <div class="col-md-6">
+              <i class="bi bi-calendar-check me-2"></i>
+              <strong>Maturity Date:</strong> {{ formatDate(statement.maturityDate) }}
+            </div>
+            <div class="col-md-6">
+              <i class="bi bi-piggy-bank-fill me-2"></i>
+              <strong>Maturity Amount:</strong> 
+              <span class="text-success fw-bold">{{ formatCurrency(statement.maturityAmount) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4 no-print">
+      <div class="col-md-3">
+        <div class="card shadow-sm border-start border-success border-4">
+          <div class="card-body">
+            <h6 class="text-muted">Total Paid</h6>
+            <h4 class="text-success mb-0">{{ formatCurrency(getTotalPaidAmount()) }}</h4>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card shadow-sm border-start border-warning border-4">
+          <div class="card-body">
+            <h6 class="text-muted">Total Pending</h6>
+            <h4 class="text-warning mb-0">{{ formatCurrency(getTotalPendingAmount()) }}</h4>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card shadow-sm border-start border-danger border-4">
+          <div class="card-body">
+            <h6 class="text-muted">Total Penalties</h6>
+            <h4 class="text-danger mb-0">{{ formatCurrency(getTotalPenaltyAmount()) }}</h4>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card shadow-sm border-start border-primary border-4">
+          <div class="card-body">
+            <h6 class="text-muted">Total Deposited</h6>
+            <h4 class="text-primary mb-0">{{ formatCurrency(statement.totalDeposited) }}</h4>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="card mb-4 shadow-sm no-print">
+      <div class="card-body">
+        <div class="row align-items-end">
+          <div class="col-md-4">
+            <label class="form-label">Filter by Status</label>
+            <select 
+              class="form-select" 
+              [(ngModel)]="filterStatus"
+              (change)="filterInstallments()">
+              <option value="">All Installments</option>
+              <option value="paid">Paid</option>
+              <option value="pending">Pending</option>
+              <option value="overdue">Overdue</option>
+              <option value="waived">Waived</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-outline-secondary w-100" (click)="clearFilter()">
+              <i class="bi bi-x-circle me-2"></i>
+              Clear Filter
+            </button>
+          </div>
+          <div class="col-md-6 text-end">
+            <span class="badge bg-primary fs-6">
+              Showing {{ filteredInstallments.length }} of {{ statement.installments.length }} installments
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Installments Table -->
+    <div class="card shadow-sm">
+      <div class="card-header bg-light">
+        <h5 class="mb-0">
+          <i class="bi bi-list-ul me-2"></i>
+          Installment Details
+        </h5>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>#</th>
+                <th>Due Date</th>
+                <th>Payment Date</th>
+                <th>Amount</th>
+                <th>Penalty</th>
+                <th>Total Paid</th>
+                <th>Status</th>
+                <th class="no-print">Transaction ID</th>
+                <th class="no-print">Receipt</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="filteredInstallments.length === 0">
+                <td colspan="9" class="text-center py-4 text-muted">
+                  <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                  No installments found
+                </td>
+              </tr>
+              <tr *ngFor="let installment of filteredInstallments">
+                <td><strong>{{ installment.installmentNumber }}</strong></td>
+                <td>{{ formatDate(installment.dueDate) }}</td>
+                <td>
+                  <span *ngIf="installment.paymentDate">
+                    {{ formatDate(installment.paymentDate) }}
+                  </span>
+                  <span *ngIf="!installment.paymentDate" class="text-muted">-</span>
+                </td>
+                <td>{{ formatCurrency(installment.amount) }}</td>
+                <td>
+                  <span [class.text-danger]="installment.penaltyAmount > 0">
+                    {{ formatCurrency(installment.penaltyAmount) }}
+                  </span>
+                </td>
+                <td>
+                  <strong *ngIf="installment.status === 'paid'">
+                    {{ formatCurrency(installment.amount + installment.penaltyAmount) }}
+                  </strong>
+                  <span *ngIf="installment.status !== 'paid'" class="text-muted">-</span>
+                </td>
+                <td>
+                  <span [class]="getStatusBadgeClass(installment.status)">
+                    {{ installment.status | titlecase }}
+                  </span>
+                </td>
+                <td class="no-print">
+                  <small *ngIf="installment.transactionId">
+                    {{ installment.transactionId }}
+                  </small>
+                  <span *ngIf="!installment.transactionId" class="text-muted">-</span>
+                </td>
+                <td class="no-print">
+                  <small *ngIf="installment.receiptNumber">
+                    {{ installment.receiptNumber }}
+                  </small>
+                  <span *ngIf="!installment.receiptNumber" class="text-muted">-</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Print Footer -->
+    <div class="mt-4 text-center text-muted print-only" style="display: none;">
+      <p class="mb-0">Generated on {{ Date.now() | date: 'medium' }}</p>
+      <p class="mb-0">This is a computer-generated statement and does not require a signature.</p>
+    </div>
+  </div>
+</div>

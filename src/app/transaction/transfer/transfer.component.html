@@ -1,0 +1,165 @@
+<div class="transfer-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="mb-4">
+                    <h2 class="mb-0">
+                        <i class="bi bi-arrow-left-right text-primary me-2"></i>
+                        Transfer Money
+                    </h2>
+                    <p class="text-muted mb-0">Securely transfer funds between your accounts or to other accounts</p>
+                </div>
+
+                <div class="alert alert-success alert-dismissible fade show" role="alert" *ngIf="success">
+                    <i class="bi bi-check-circle me-2"></i>
+                    {{ success }}
+                    <button type="button" class="btn-close" (click)="success = ''"></button>
+                </div>
+
+                <div class="alert alert-danger alert-dismissible fade show" role="alert" *ngIf="error">
+                    <i class="bi bi-exclamation-circle me-2"></i>
+                    {{ error }}
+                    <button type="button" class="btn-close" (click)="error = ''"></button>
+                </div>
+
+                <div class="card">
+                    <div class="card-body p-4">
+                        <form [formGroup]="transferForm" (ngSubmit)="onSubmit()">
+
+                            <div class="mb-4">
+                                <label for="fromAccountNumber" class="form-label">From Account (Sender) *</label>
+                                <select
+                                    class="form-select"
+                                    id="fromAccountNumber"
+                                    formControlName="fromAccountNumber"
+                                    [class.is-invalid]="submitted && f['fromAccountNumber'].errors"
+                                >
+                                    <option value="" disabled>Select Source Account</option>
+                                    <option *ngFor="let account of myAccounts" [value]="account.accountNumber">
+                                        {{ account.accountNumber }} - {{ account.accountType }}
+                                    </option>
+                                </select>
+                                <div class="invalid-feedback" *ngIf="submitted && f['fromAccountNumber'].errors">
+                                    Source account is required
+                                </div>
+                                <small class="text-muted" *ngIf="selectedAccountBalance > 0">
+                                    Available Balance: **USD {{ selectedAccountBalance | number:'1.2-2' }}**
+                                </small>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="toAccountNumber" class="form-label">To Account (Recipient) *</label>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="toAccountNumber"
+                                    formControlName="toAccountNumber"
+                                    placeholder="Enter Recipient Account Number"
+                                    [class.is-invalid]="submitted && f['toAccountNumber'].errors"
+                                />
+                                <div class="invalid-feedback" *ngIf="submitted && f['toAccountNumber'].errors">
+                                    Recipient account number is required
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="amount" class="form-label">Amount *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">USD</span>
+                                    <input
+                                        type="number"
+                                        class="form-control"
+                                        id="amount"
+                                        formControlName="amount"
+                                        placeholder="0.00"
+                                        step="0.01"
+                                        [class.is-invalid]="submitted && f['amount'].errors"
+                                    />
+                                </div>
+                                <div class="invalid-feedback d-block" *ngIf="submitted && f['amount'].errors">
+                                    <div *ngIf="f['amount'].errors?.['required']">Amount is required</div>
+                                    <div *ngIf="f['amount'].errors?.['min']">Amount must be greater than 0</div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <label for="transferMode" class="form-label">Transfer Mode *</label>
+                                    <select
+                                        class="form-select"
+                                        id="transferMode"
+                                        formControlName="transferMode"
+                                        [class.is-invalid]="submitted && f['transferMode'].errors"
+                                    >
+                                        <option *ngFor="let mode of transferModes" [value]="mode">
+                                            {{ mode }}
+                                        </option>
+                                    </select>
+                                    <div class="invalid-feedback" *ngIf="submitted && f['transferMode'].errors">
+                                        Transfer mode is required
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mb-4" hidden>
+                                    <label for="priority" class="form-label">Priority</label>
+                                    <input type="text" formControlName="priority" class="form-control">
+                                </div>
+                                
+                                <div class="col-md-6 mb-4" hidden>
+                                    <label for="transferType" class="form-label">Transfer Type</label>
+                                    <input type="text" formControlName="transferType" class="form-control">
+                                </div>
+
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="description" class="form-label">Description</label>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="description"
+                                    formControlName="description"
+                                    placeholder="e.g., Payment for services"
+                                />
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="remarks" class="form-label">Remarks</label>
+                                <textarea
+                                    class="form-control"
+                                    id="remarks"
+                                    formControlName="remarks"
+                                    rows="2"
+                                    placeholder="Additional remarks for bank records"
+                                ></textarea>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg" [disabled]="loading">
+                                    <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+                                    <i *ngIf="!loading" class="bi bi-send me-2"></i>
+                                    {{ loading ? 'Processing Transfer...' : 'Confirm Transfer' }}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h6 class="mb-2">
+                            <i class="bi bi-info-circle text-info me-2"></i>
+                            Transfer Information
+                        </h6>
+                        <ul class="mb-0 small text-muted">
+                            <li>**IMPS/UPI:** Instant, 24/7 transfer.</li>
+                            <li>**NEFT:** Typically hourly batches, available during banking hours.</li>
+                            <li>**RTGS:** For large value transactions, available during banking hours.</li>
+                            <li>Ensure the recipient account number is correct to avoid failed transactions.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

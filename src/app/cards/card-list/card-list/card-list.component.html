@@ -1,0 +1,277 @@
+
+<div class="container-fluid py-4">
+  <!-- Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h2 class="mb-0">
+            <i class="bi bi-credit-card text-primary me-2"></i>
+            Card Management
+          </h2>
+          <p class="text-muted mb-0">Manage all customer cards</p>
+        </div>
+        <button class="btn btn-primary" (click)="issueNewCard()">
+          <i class="bi bi-plus-circle me-2"></i>
+          Issue New Card
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Alert -->
+  <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    {{ error }}
+    <button type="button" class="btn-close" (click)="error = null"></button>
+  </div>
+
+  <!-- Filters -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Search</label>
+          <input 
+            type="text" 
+            class="form-control" 
+            placeholder="Card number, holder name, customer ID..."
+            [(ngModel)]="searchTerm"
+            (input)="onFilterChange()">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Status</label>
+          <select class="form-select" [(ngModel)]="filterStatus" (change)="onFilterChange()">
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="blocked">Blocked</option>
+            <option value="expired">Expired</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Card Type</label>
+          <select class="form-select" [(ngModel)]="filterType" (change)="onFilterChange()">
+            <option value="">All Types</option>
+            <option value="debit_card">Debit Card</option>
+            <option value="credit_card">Credit Card</option>
+            <option value="prepaid_card">Prepaid Card</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="text-muted mt-2">Loading cards...</p>
+  </div>
+
+  <!-- Cards Table -->
+  <div *ngIf="!loading" class="card border-0 shadow-sm">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Card Number</th>
+              <th>Holder Name</th>
+              <th>Type</th>
+              <th>Customer ID</th>
+              <th>Account</th>
+              <th>Expiry Date</th>
+              <th>Status</th>
+              <th>Credit Limit</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let card of filteredCards">
+              <td>
+                <strong>{{ card.maskedCardNumber }}</strong>
+                <br>
+                <small *ngIf="card.isInternational" class="text-muted">
+                  <i class="bi bi-globe"></i> International
+                </small>
+              </td>
+              <td>{{ card.cardHolderName }}</td>
+              <td>
+                <span class="badge" [ngClass]="getCardTypeBadge(card.cardType)">
+                  {{ formatType(card.cardType) }}
+                </span>
+              </td>
+              <td>{{ card.customerId }}</td>
+              <td>{{ card.accountNumber }}</td>
+              <td>{{ formatDate(card.expiryDate) }}</td>
+              <td>
+                <span class="badge" [ngClass]="getStatusBadge(card.status)">
+                  {{ card.status | uppercase }}
+                </span>
+              </td>
+              <td>
+                <span *ngIf="card.creditLimit">
+                  ${{ card.creditLimit | number:'1.2-2' }}
+                  <br>
+                  <small class="text-muted">Available: ${{ card.availableLimit | number:'1.2-2' }}</small>
+                </span>
+                <span *ngIf="!card.creditLimit" class="text-muted">N/A</span>
+              </td>
+              <td>
+                <div class="btn-group btn-group-sm">
+                  <button 
+                    class="btn btn-outline-primary" 
+                    (click)="viewDetails(card.id)"
+                    title="View Details">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                  <button 
+                    *ngIf="card.status === 'blocked'" 
+                    class="btn btn-outline-success" 
+                    (click)="openUnblockModal(card)"
+                    title="Unblock Card">
+                    <i class="bi bi-unlock"></i>
+                  </button>
+                  <button 
+                    *ngIf="card.creditLimit && card.status !== 'cancelled'" 
+                    class="btn btn-outline-info" 
+                    (click)="openLimitModal(card)"
+                    title="Update Limit">
+                    <i class="bi bi-cash-stack"></i>
+                  </button>
+                  <button 
+                    *ngIf="card.status !== 'cancelled'" 
+                    class="btn btn-outline-danger" 
+                    (click)="openCancelModal(card)"
+                    title="Cancel Card">
+                    <i class="bi bi-x-circle"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="filteredCards.length === 0">
+              <td colspan="9" class="text-center text-muted py-4">
+                <i class="bi bi-inbox display-4"></i>
+                <p class="mt-2">No cards found</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card-footer bg-transparent">
+      <small class="text-muted">
+        Showing {{ filteredCards.length }} of {{ cards.length }} cards
+      </small>
+    </div>
+  </div>
+</div>
+
+<!-- Unblock Modal -->
+<div class="modal fade" id="unblockModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Unblock Card</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to unblock this card?</p>
+        <div *ngIf="selectedCard" class="alert alert-info">
+          <strong>{{ selectedCard.maskedCardNumber }}</strong><br>
+          {{ selectedCard.cardHolderName }}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-success" (click)="confirmUnblock()">
+          <i class="bi bi-unlock me-2"></i>Unblock
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Cancel Modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cancel Card</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="selectedCard" class="alert alert-warning">
+          <strong>{{ selectedCard.maskedCardNumber }}</strong><br>
+          {{ selectedCard.cardHolderName }}
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Reason for Cancellation *</label>
+          <textarea 
+            class="form-control" 
+            rows="3" 
+            [(ngModel)]="cancelReason"
+            placeholder="Enter reason for cancelling this card..."></textarea>
+        </div>
+        <p class="text-danger small">
+          <i class="bi bi-exclamation-triangle me-1"></i>
+          This action cannot be undone.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button 
+          type="button" 
+          class="btn btn-danger" 
+          (click)="confirmCancel()"
+          [disabled]="!cancelReason.trim()">
+          <i class="bi bi-x-circle me-2"></i>Cancel Card
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Credit Limit Modal -->
+<div class="modal fade" id="limitModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Update Credit Limit</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="selectedCard" class="alert alert-info">
+          <strong>{{ selectedCard.maskedCardNumber }}</strong><br>
+          {{ selectedCard.cardHolderName }}<br>
+          <small>Current Limit: ${{ selectedCard.creditLimit | number:'1.2-2' }}</small>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">New Credit Limit *</label>
+          <input 
+            type="number" 
+            class="form-control" 
+            [(ngModel)]="newCreditLimit"
+            min="0"
+            max="1000000"
+            step="100"
+            placeholder="Enter new credit limit">
+          <small class="text-muted">Maximum: $1,000,000</small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button 
+          type="button" 
+          class="btn btn-primary" 
+          (click)="confirmLimitUpdate()"
+          [disabled]="!newCreditLimit || newCreditLimit <= 0">
+          <i class="bi bi-check-circle me-2"></i>Update Limit
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

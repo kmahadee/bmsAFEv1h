@@ -1,0 +1,219 @@
+
+<div class="branch-detail-container">
+  <div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <button class="btn btn-outline-secondary btn-sm me-3" (click)="goBack()">
+              <i class="bi bi-arrow-left me-2"></i>
+              Back
+            </button>
+            <h2 class="d-inline mb-0">
+              <i class="bi bi-building text-primary me-2"></i>
+              Branch Details
+            </h2>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-warning" (click)="editBranch()">
+              <i class="bi bi-pencil me-2"></i>
+              Edit
+            </button>
+            <button class="btn btn-danger" (click)="deleteBranch()">
+              <i class="bi bi-trash me-2"></i>
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <app-loading-spinner *ngIf="loading" message="Loading branch details..."></app-loading-spinner>
+
+    <!-- Branch Information -->
+    <div *ngIf="!loading && branch">
+      <!-- Branch Header Card -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card bg-gradient-primary text-white">
+            <div class="card-body p-4">
+              <div class="row align-items-center">
+                <div class="col-md-8">
+                  <h3 class="mb-2">{{ branch.branchName }}</h3>
+                  <p class="mb-0 opacity-75">
+                    <i class="bi bi-geo-alt me-2"></i>
+                    {{ branch.address }}, {{ branch.city }}, {{ branch.state }} {{ branch.zipCode }}
+                  </p>
+                  <div class="mt-3">
+                    <span class="badge bg-white text-primary me-2">{{ branch.branchCode }}</span>
+                    <span class="badge bg-white text-primary me-2">{{ branch.ifscCode }}</span>
+                    <span *ngIf="branch.isMainBranch" class="badge bg-warning text-dark">Main Branch</span>
+                  </div>
+                </div>
+                <div class="col-md-4 text-end">
+                  <i class="bi bi-building" style="font-size: 5rem; opacity: 0.3;"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistics Cards -->
+      <div class="row mb-4">
+        <div class="col-md-4">
+          <div class="card h-100">
+            <div class="card-body text-center">
+              <i class="bi bi-shield-check text-primary mb-2" style="font-size: 2rem;"></i>
+              <h6 class="text-muted mb-2">Branch Status</h6>
+              <span class="badge" [ngClass]="{
+                'bg-success': branch.status === 'active',
+                'bg-danger': branch.status === 'inactive',
+                'bg-warning': branch.status === 'under_maintenance'
+              }">
+                {{ branch.status }}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card h-100">
+            <div class="card-body text-center">
+              <i class="bi bi-wallet2 text-success mb-2" style="font-size: 2rem;"></i>
+              <h6 class="text-muted mb-2">Total Accounts</h6>
+              <h4 class="mb-0">{{ branch.totalAccounts }}</h4>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card h-100">
+            <div class="card-body text-center">
+              <i class="bi bi-people text-info mb-2" style="font-size: 2rem;"></i>
+              <h6 class="text-muted mb-2">Total Employees</h6>
+              <h4 class="mb-0">{{ branch.totalEmployees }}</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailed Information -->
+      <div class="row">
+        <!-- Contact Information -->
+        <div class="col-lg-6 mb-4">
+          <div class="card h-100">
+            <div class="card-header bg-white">
+              <h5 class="mb-0">
+                <i class="bi bi-telephone me-2"></i>
+                Contact Information
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="row mb-3">
+                <div class="col-12">
+                  <label class="text-muted small">Phone</label>
+                  <p class="mb-0"><i class="bi bi-telephone me-2"></i>{{ branch.phone }}</p>
+                </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-12">
+                  <label class="text-muted small">Email</label>
+                  <p class="mb-0"><i class="bi bi-envelope me-2"></i>{{ branch.email }}</p>
+                </div>
+              </div>
+              <div class="row mb-3" *ngIf="branch.workingHours">
+                <div class="col-12">
+                  <label class="text-muted small">Working Hours</label>
+                  <p class="mb-0"><i class="bi bi-clock me-2"></i>{{ branch.workingHours }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Manager Information -->
+        <div class="col-lg-6 mb-4">
+          <div class="card h-100">
+            <div class="card-header bg-white">
+              <h5 class="mb-0">
+                <i class="bi bi-person-badge me-2"></i>
+                Manager Information
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="row mb-3">
+                <div class="col-12">
+                  <label class="text-muted small">Manager Name</label>
+                  <p class="mb-0">{{ branch.managerName || 'Not assigned' }}</p>
+                </div>
+              </div>
+              <div class="row mb-3" *ngIf="branch.managerPhone">
+                <div class="col-12">
+                  <label class="text-muted small">Manager Phone</label>
+                  <p class="mb-0"><i class="bi bi-telephone me-2"></i>{{ branch.managerPhone }}</p>
+                </div>
+              </div>
+              <div class="row mb-3" *ngIf="branch.managerEmail">
+                <div class="col-12">
+                  <label class="text-muted small">Manager Email</label>
+                  <p class="mb-0"><i class="bi bi-envelope me-2"></i>{{ branch.managerEmail }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Banking Codes -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header bg-white">
+              <h5 class="mb-0">
+                <i class="bi bi-hash me-2"></i>
+                Banking Codes
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-4">
+                  <label class="text-muted small">Branch Code</label>
+                  <p class="mb-0"><code>{{ branch.branchCode }}</code></p>
+                </div>
+                <div class="col-md-4">
+                  <label class="text-muted small">IFSC Code</label>
+                  <p class="mb-0"><code>{{ branch.ifscCode }}</code></p>
+                </div>
+                <div class="col-md-4" *ngIf="branch.swiftCode">
+                  <label class="text-muted small">SWIFT Code</label>
+                  <p class="mb-0"><code>{{ branch.swiftCode }}</code></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timestamps -->
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-body">
+              <div class="row text-center">
+                <div class="col-md-6">
+                  <label class="text-muted small">Created Date</label>
+                  <p class="mb-0">{{ branch.createdDate | date:'medium' }}</p>
+                </div>
+                <div class="col-md-6">
+                  <label class="text-muted small">Last Updated</label>
+                  <p class="mb-0">{{ branch.lastUpdated | date:'medium' }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,244 @@
+
+<div class="account-detail-container">
+  <div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <button class="btn btn-outline-secondary btn-sm me-3" (click)="goBack()">
+              <i class="bi bi-arrow-left me-2"></i>
+              Back
+            </button>
+            <h2 class="d-inline mb-0">
+              <i class="bi bi-wallet2 text-primary me-2"></i>
+              Account Details
+            </h2>
+          </div>
+          <div class="btn-group" *ngIf="account">
+            <button class="btn btn-info" (click)="viewStatement()">
+              <i class="bi bi-file-text me-2"></i>
+              Statement
+            </button>
+            <button 
+              *ngIf="account.status === 'active'" 
+              class="btn btn-warning" 
+              (click)="freezeAccount()"
+            >
+              <i class="bi bi-lock me-2"></i>
+              Freeze
+            </button>
+            <button 
+              *ngIf="account.status === 'frozen'" 
+              class="btn btn-success" 
+              (click)="unfreezeAccount()"
+            >
+              <i class="bi bi-unlock me-2"></i>
+              Unfreeze
+            </button>
+            <button class="btn btn-danger" (click)="closeAccount()">
+              <i class="bi bi-x-circle me-2"></i>
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <app-loading-spinner *ngIf="loading" message="Loading account details..."></app-loading-spinner>
+
+    <!-- Account Information -->
+    <div *ngIf="!loading && account">
+      <!-- Balance Card -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card bg-gradient-primary text-white">
+            <div class="card-body p-4">
+              <div class="row align-items-center">
+                <div class="col-md-8">
+                  <h6 class="opacity-75 mb-2">Current Balance</h6>
+                  <h1 class="mb-0 display-4">{{ account.currency }} {{ account.balance | number:'1.2-2' }}</h1>
+                  <p class="mb-0 mt-3">
+                    <strong>{{ account.accountNumber }}</strong>
+                    <span class="badge bg-white text-primary ms-3">{{ account.accountType }}</span>
+                  </p>
+                </div>
+                <div class="col-md-4 text-end">
+                  <i class="bi bi-wallet2" style="font-size: 5rem; opacity: 0.3;"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Info Cards -->
+      <div class="row mb-4">
+        <!-- Status -->
+        <div class="col-md-3">
+          <div class="card h-100">
+            <div class="card-body text-center">
+              <i class="bi bi-shield-check text-primary mb-2" style="font-size: 2rem;"></i>
+              <h6 class="text-muted mb-2">Account Status</h6>
+              <span class="badge" [ngClass]="{
+                'bg-success': account.status === 'active',
+                'bg-danger': account.status === 'inactive',
+                'bg-warning': account.status === 'frozen',
+                'bg-secondary': account.status === 'closed'
+              }">
+                {{ account.status }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- KYC Status -->
+        <div class="col-md-3">
+          <div class="card h-100">
+            <div class="card-body text-center">
+              <i class="bi bi-patch-check text-success mb-2" style="font-size: 2rem;"></i>
+              <h6 class="text-muted mb-2">KYC Status</h6>
+              <span class="badge" [ngClass]="{
+                'bg-success': account.kycStatus === 'verified',
+                'bg-warning': account.kycStatus === 'pending',
+                'bg-danger': account.kycStatus === 'rejected'
+              }">
+                {{ account.kycStatus }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interest Rate -->
+        <div class="col-md-3">
+          <div class="card h-100">
+            <div class="card-body text-center">
+              <i class="bi bi-percent text-info mb-2" style="font-size: 2rem;"></i>
+              <h6 class="text-muted mb-2">Interest Rate</h6>
+              <h4 class="mb-0">{{ account.interestRate }}%</h4>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total Transactions -->
+        <div class="col-md-3">
+          <div class="card h-100">
+            <div class="card-body text-center">
+              <i class="bi bi-arrow-left-right text-warning mb-2" style="font-size: 2rem;"></i>
+              <h6 class="text-muted mb-2">Transactions</h6>
+              <h4 class="mb-0">{{ account.totalTransactions }}</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailed Information -->
+      <div class="row">
+        <!-- Account Details -->
+        <div class="col-lg-6 mb-4">
+          <div class="card h-100">
+            <div class="card-header bg-white">
+              <h5 class="mb-0">
+                <i class="bi bi-info-circle me-2"></i>
+                Account Information
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="row mb-3">
+                <div class="col-6">
+                  <label class="text-muted small">Account Number</label>
+                  <p class="mb-0"><strong>{{ account.accountNumber }}</strong></p>
+                </div>
+                <div class="col-6">
+                  <label class="text-muted small">Account Type</label>
+                  <p class="mb-0">{{ account.accountType }}</p>
+                </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-6">
+                  <label class="text-muted small">Branch</label>
+                  <p class="mb-0">{{ account.branch }}</p>
+                </div>
+                <div class="col-6">
+                  <label class="text-muted small">Currency</label>
+                  <p class="mb-0">{{ account.currency }}</p>
+                </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-6">
+                  <label class="text-muted small">Created Date</label>
+                  <p class="mb-0">{{ account.createdDate | date:'medium' }}</p>
+                </div>
+                <div class="col-6">
+                  <label class="text-muted small">Last Updated</label>
+                  <p class="mb-0">{{ account.lastUpdated | date:'medium' }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Customer Details -->
+        <div class="col-lg-6 mb-4">
+          <div class="card h-100">
+            <div class="card-header bg-white">
+              <h5 class="mb-0">
+                <i class="bi bi-person me-2"></i>
+                Customer Information
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="row mb-3">
+                <div class="col-6">
+                  <label class="text-muted small">Customer ID</label>
+                  <p class="mb-0">{{ account.customerId }}</p>
+                </div>
+                <div class="col-6">
+                  <label class="text-muted small">Customer Name</label>
+                  <p class="mb-0">{{ account.customerName }}</p>
+                </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-12">
+                  <label class="text-muted small">Email</label>
+                  <p class="mb-0">{{ account.customerEmail }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Nominee Information -->
+      <div class="row" *ngIf="account.nomineeFirstName">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header bg-white">
+              <h5 class="mb-0">
+                <i class="bi bi-people me-2"></i>
+                Nominee Information
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-3">
+                  <label class="text-muted small">Nominee Name</label>
+                  <p class="mb-0">{{ account.nomineeFirstName }} {{ account.nomineeLastName }}</p>
+                </div>
+                <div class="col-md-3">
+                  <label class="text-muted small">Relationship</label>
+                  <p class="mb-0">{{ account.nomineeRelationship }}</p>
+                </div>
+                <div class="col-md-3">
+                  <label class="text-muted small">Phone</label>
+                  <p class="mb-0">{{ account.nomineePhone }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

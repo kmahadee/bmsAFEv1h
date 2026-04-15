@@ -1,0 +1,260 @@
+
+<div class="branch-edit-container">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <!-- Header -->
+        <div class="mb-4">
+          <button class="btn btn-outline-secondary btn-sm me-3" (click)="cancel()">
+            <i class="bi bi-arrow-left me-2"></i>
+            Back
+          </button>
+          <h2 class="d-inline mb-0">
+            <i class="bi bi-pencil text-warning me-2"></i>
+            Edit Branch
+          </h2>
+        </div>
+
+        <!-- Success Alert -->
+        <div class="alert alert-success alert-dismissible fade show" role="alert" *ngIf="success">
+          <i class="bi bi-check-circle me-2"></i>
+          {{ success }}
+        </div>
+
+        <!-- Error Alert -->
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" *ngIf="error">
+          <i class="bi bi-exclamation-circle me-2"></i>
+          {{ error }}
+          <button type="button" class="btn-close" (click)="error = ''"></button>
+        </div>
+
+        <!-- Loading Spinner -->
+        <app-loading-spinner *ngIf="loading && !branchForm.value.branchName" message="Loading branch data..."></app-loading-spinner>
+
+        <!-- Form -->
+        <div class="card" *ngIf="!loading || branchForm.value.branchName">
+          <div class="card-body p-4">
+            <form [formGroup]="branchForm" (ngSubmit)="onSubmit()">
+              <!-- Branch Information -->
+              <h5 class="mb-3">
+                <i class="bi bi-building me-2"></i>
+                Branch Information
+              </h5>
+
+              <div class="mb-3">
+                <label for="branchName" class="form-label">Branch Name *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="branchName"
+                  formControlName="branchName"
+                  placeholder="Main Branch"
+                  [class.is-invalid]="submitted && f['branchName'].errors"
+                />
+                <div class="invalid-feedback" *ngIf="submitted && f['branchName'].errors">
+                  <div *ngIf="f['branchName'].errors['required']">Branch name is required</div>
+                  <div *ngIf="f['branchName'].errors['minlength']">Must be at least 3 characters</div>
+                </div>
+              </div>
+
+              <!-- Address Information -->
+              <h5 class="mb-3 mt-4">
+                <i class="bi bi-geo-alt me-2"></i>
+                Address Information
+              </h5>
+
+              <div class="mb-3">
+                <label for="address" class="form-label">Street Address *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="address"
+                  formControlName="address"
+                  placeholder="123 Main Street"
+                  [class.is-invalid]="submitted && f['address'].errors"
+                />
+                <div class="invalid-feedback" *ngIf="submitted && f['address'].errors">
+                  Address is required
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-4 mb-3">
+                  <label for="city" class="form-label">City *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="city"
+                    formControlName="city"
+                    [class.is-invalid]="submitted && f['city'].errors"
+                  />
+                  <div class="invalid-feedback" *ngIf="submitted && f['city'].errors">
+                    City is required
+                  </div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                  <label for="state" class="form-label">State *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="state"
+                    formControlName="state"
+                    [class.is-invalid]="submitted && f['state'].errors"
+                  />
+                  <div class="invalid-feedback" *ngIf="submitted && f['state'].errors">
+                    State is required
+                  </div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                  <label for="zipCode" class="form-label">Zip Code *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="zipCode"
+                    formControlName="zipCode"
+                    [class.is-invalid]="submitted && f['zipCode'].errors"
+                  />
+                  <div class="invalid-feedback" *ngIf="submitted && f['zipCode'].errors">
+                    <div *ngIf="f['zipCode'].errors['required']">Zip code is required</div>
+                    <div *ngIf="f['zipCode'].errors['pattern']">Invalid zip code format</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Contact Information -->
+              <h5 class="mb-3 mt-4">
+                <i class="bi bi-telephone me-2"></i>
+                Contact Information
+              </h5>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="phone" class="form-label">Phone *</label>
+                  <input
+                    type="tel"
+                    class="form-control"
+                    id="phone"
+                    formControlName="phone"
+                    placeholder="+1234567890"
+                    [class.is-invalid]="submitted && f['phone'].errors"
+                  />
+                  <div class="invalid-feedback" *ngIf="submitted && f['phone'].errors">
+                    <div *ngIf="f['phone'].errors['required']">Phone is required</div>
+                    <div *ngIf="f['phone'].errors['pattern']">Invalid phone format</div>
+                  </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <label for="email" class="form-label">Email *</label>
+                  <input
+                    type="email"
+                    class="form-control"
+                    id="email"
+                    formControlName="email"
+                    placeholder="branch@example.com"
+                    [class.is-invalid]="submitted && f['email'].errors"
+                  />
+                  <div class="invalid-feedback" *ngIf="submitted && f['email'].errors">
+                    <div *ngIf="f['email'].errors['required']">Email is required</div>
+                    <div *ngIf="f['email'].errors['email']">Invalid email format</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="workingHours" class="form-label">Working Hours</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="workingHours"
+                  formControlName="workingHours"
+                  placeholder="9:00 AM - 5:00 PM"
+                />
+              </div>
+
+              <!-- Manager Information -->
+              <h5 class="mb-3 mt-4">
+                <i class="bi bi-person-badge me-2"></i>
+                Manager Information (Optional)
+              </h5>
+
+              <div class="mb-3">
+                <label for="managerName" class="form-label">Manager Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="managerName"
+                  formControlName="managerName"
+                  placeholder="John Doe"
+                />
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="managerPhone" class="form-label">Manager Phone</label>
+                  <input
+                    type="tel"
+                    class="form-control"
+                    id="managerPhone"
+                    formControlName="managerPhone"
+                    placeholder="+1234567890"
+                    [class.is-invalid]="submitted && f['managerPhone'].errors"
+                  />
+                  <div class="invalid-feedback" *ngIf="submitted && f['managerPhone'].errors">
+                    Invalid phone format
+                  </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <label for="managerEmail" class="form-label">Manager Email</label>
+                  <input
+                    type="email"
+                    class="form-control"
+                    id="managerEmail"
+                    formControlName="managerEmail"
+                    placeholder="manager@example.com"
+                    [class.is-invalid]="submitted && f['managerEmail'].errors"
+                  />
+                  <div class="invalid-feedback" *ngIf="submitted && f['managerEmail'].errors">
+                    Invalid email format
+                  </div>
+                </div>
+              </div>
+
+              <!-- Status -->
+              <h5 class="mb-3 mt-4">
+                <i class="bi bi-gear me-2"></i>
+                Branch Status
+              </h5>
+
+              <div class="mb-3">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-select" id="status" formControlName="status">
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                  <option value="under_maintenance">Under Maintenance</option>
+                </select>
+                <small class="text-muted">Change branch operational status</small>
+              </div>
+
+              <!-- Submit Buttons -->
+              <div class="d-flex justify-content-end gap-2 mt-4">
+                <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="loading">
+                  <i class="bi bi-x-circle me-2"></i>
+                  Cancel
+                </button>
+                <button type="submit" class="btn btn-warning" [disabled]="loading">
+                  <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+                  <i *ngIf="!loading" class="bi bi-save me-2"></i>
+                  {{ loading ? 'Updating...' : 'Update Branch' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,242 @@
+<div class="emi-calculator card shadow-sm">
+  <div class="card-header bg-primary text-white">
+    <h5 class="mb-0">
+      <i class="bi bi-calculator me-2"></i>
+      EMI Calculator
+    </h5>
+  </div>
+
+  <div class="card-body">
+    <form [formGroup]="calculatorForm" (ngSubmit)="calculateEMI()">
+      <!-- Loan Amount -->
+      <div class="mb-4">
+        <label for="loanAmount" class="form-label">
+          Loan Amount (BDT)
+          <span class="text-danger">*</span>
+        </label>
+        <input
+          type="number"
+          id="loanAmount"
+          class="form-control"
+          formControlName="loanAmount"
+          [class.is-invalid]="calculatorForm.get('loanAmount')?.invalid && 
+                              calculatorForm.get('loanAmount')?.touched">
+        <div class="form-text">
+          Min: {{ MIN_LOAN_AMOUNT | number }} | Max: {{ MAX_LOAN_AMOUNT | number }}
+        </div>
+        <div class="invalid-feedback" 
+             *ngIf="calculatorForm.get('loanAmount')?.errors?.['required']">
+          Loan amount is required
+        </div>
+        <div class="invalid-feedback" 
+             *ngIf="calculatorForm.get('loanAmount')?.errors?.['min']">
+          Minimum loan amount is {{ MIN_LOAN_AMOUNT | number }}
+        </div>
+        <div class="invalid-feedback" 
+             *ngIf="calculatorForm.get('loanAmount')?.errors?.['max']">
+          Maximum loan amount is {{ MAX_LOAN_AMOUNT | number }}
+        </div>
+      </div>
+
+      <!-- Interest Rate -->
+      <div class="mb-4">
+        <label for="interestRate" class="form-label">
+          Annual Interest Rate (%)
+          <span class="text-danger">*</span>
+        </label>
+        <input
+          type="number"
+          id="interestRate"
+          class="form-control"
+          formControlName="interestRate"
+          step="0.1"
+          [class.is-invalid]="calculatorForm.get('interestRate')?.invalid && 
+                              calculatorForm.get('interestRate')?.touched">
+        <div class="form-text">
+          Min: {{ MIN_RATE }}% | Max: {{ MAX_RATE }}%
+        </div>
+        <div class="invalid-feedback" 
+             *ngIf="calculatorForm.get('interestRate')?.errors?.['required']">
+          Interest rate is required
+        </div>
+        <div class="invalid-feedback" 
+             *ngIf="calculatorForm.get('interestRate')?.errors?.['min']">
+          Minimum interest rate is {{ MIN_RATE }}%
+        </div>
+        <div class="invalid-feedback" 
+             *ngIf="calculatorForm.get('interestRate')?.errors?.['max']">
+          Maximum interest rate is {{ MAX_RATE }}%
+        </div>
+      </div>
+
+      <!-- Tenure -->
+      <div class="mb-4">
+        <label for="tenureMonths" class="form-label">
+          Loan Tenure (Months)
+          <span class="text-danger">*</span>
+        </label>
+        <input
+          type="number"
+          id="tenureMonths"
+          class="form-control"
+          formControlName="tenureMonths"
+          [class.is-invalid]="calculatorForm.get('tenureMonths')?.invalid && 
+                              calculatorForm.get('tenureMonths')?.touched">
+        <div class="form-text">
+          {{ getTenureInYears() }} Year(s) {{ getTenureRemainingMonths() }} Month(s) | 
+          Min: {{ MIN_TENURE }} | Max: {{ MAX_TENURE }} months
+        </div>
+        <div class="invalid-feedback" 
+             *ngIf="calculatorForm.get('tenureMonths')?.errors?.['required']">
+          Tenure is required
+        </div>
+        <div class="invalid-feedback" 
+             *ngIf="calculatorForm.get('tenureMonths')?.errors?.['min']">
+          Minimum tenure is {{ MIN_TENURE }} months
+        </div>
+        <div class="invalid-feedback" 
+             *ngIf="calculatorForm.get('tenureMonths')?.errors?.['max']">
+          Maximum tenure is {{ MAX_TENURE }} months
+        </div>
+      </div>
+
+      <!-- Buttons -->
+      <div class="d-flex gap-2">
+        <button 
+          type="submit" 
+          class="btn btn-primary flex-fill"
+          [disabled]="calculatorForm.invalid">
+          <i class="bi bi-calculator-fill me-2"></i>
+          Calculate EMI
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-outline-secondary"
+          (click)="resetCalculator()">
+          <i class="bi bi-arrow-clockwise"></i>
+        </button>
+      </div>
+    </form>
+
+    <!-- Results -->
+    <div class="calculation-results mt-4" *ngIf="showResults">
+      <hr>
+      
+      <div class="alert alert-success" role="alert">
+        <h5 class="alert-heading">
+          <i class="bi bi-check-circle me-2"></i>
+          Calculation Results
+        </h5>
+      </div>
+
+      <!-- EMI Amount -->
+      <div class="result-card mb-3 p-3 bg-light rounded">
+        <div class="text-center">
+          <small class="text-muted d-block mb-1">Monthly EMI</small>
+          <h3 class="mb-0 text-primary">{{ formatCurrency(calculatedEMI) }}</h3>
+        </div>
+      </div>
+
+      <!-- Summary Grid -->
+      <div class="row g-3 mb-3">
+        <div class="col-md-4">
+          <div class="summary-box p-3 border rounded text-center">
+            <small class="text-muted d-block">Principal Amount</small>
+            <h6 class="mb-0">{{ formatCurrency(calculatorForm.get('loanAmount')?.value) }}</h6>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="summary-box p-3 border rounded text-center">
+            <small class="text-muted d-block">Total Interest</small>
+            <h6 class="mb-0 text-warning">{{ formatCurrency(totalInterest) }}</h6>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="summary-box p-3 border rounded text-center">
+            <small class="text-muted d-block">Total Amount</small>
+            <h6 class="mb-0 text-success">{{ formatCurrency(totalAmount) }}</h6>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart -->
+      <div class="chart-section mb-3">
+        <h6 class="mb-2">Payment Breakdown</h6>
+        <div class="d-flex align-items-center mb-2">
+          <div class="flex-fill">
+            <div class="progress" style="height: 30px;">
+              <div 
+                class="progress-bar bg-primary" 
+                role="progressbar" 
+                [style.width.%]="getPrincipalPercentage()"
+                [attr.aria-valuenow]="getPrincipalPercentage()" 
+                aria-valuemin="0" 
+                aria-valuemax="100">
+                Principal {{ getPrincipalPercentage().toFixed(1) }}%
+              </div>
+              <div 
+                class="progress-bar bg-warning" 
+                role="progressbar" 
+                [style.width.%]="getInterestPercentage()"
+                [attr.aria-valuenow]="getInterestPercentage()" 
+                aria-valuemin="0" 
+                aria-valuemax="100">
+                Interest {{ getInterestPercentage().toFixed(1) }}%
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex justify-content-center gap-3">
+          <small>
+            <span class="badge bg-primary">Principal</span>
+            {{ formatCurrency(calculatorForm.get('loanAmount')?.value) }}
+          </small>
+          <small>
+            <span class="badge bg-warning">Interest</span>
+            {{ formatCurrency(totalInterest) }}
+          </small>
+        </div>
+      </div>
+
+      <!-- Generate Schedule Button -->
+      <button 
+        type="button" 
+        class="btn btn-outline-info w-100"
+        (click)="generateSchedule()"
+        *ngIf="!showSchedule">
+        <i class="bi bi-table me-2"></i>
+        Generate Amortization Schedule
+      </button>
+
+      <!-- Amortization Schedule -->
+      <div class="schedule-section mt-3" *ngIf="showSchedule">
+        <h6 class="mb-3">Amortization Schedule (First 12 Months)</h6>
+        <div class="table-responsive">
+          <table class="table table-sm table-striped">
+            <thead class="table-dark">
+              <tr>
+                <th>#</th>
+                <th>EMI</th>
+                <th>Principal</th>
+                <th>Interest</th>
+                <th>Balance</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of amortizationSchedule.slice(0, 12)">
+                <td>{{ item.installmentNumber }}</td>
+                <td>{{ formatCurrency(item.emi) }}</td>
+                <td>{{ formatCurrency(item.principalAmount) }}</td>
+                <td class="text-warning">{{ formatCurrency(item.interestAmount) }}</td>
+                <td class="text-primary">{{ formatCurrency(item.outstandingBalance) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <small class="text-muted">
+          * Showing first 12 installments only
+        </small>
+      </div>
+    </div>
+  </div>
+</div>

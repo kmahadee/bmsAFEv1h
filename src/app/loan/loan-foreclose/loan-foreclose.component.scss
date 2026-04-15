@@ -1,0 +1,177 @@
+// Custom Theme Colors
+$primary-gradient: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+$success-soft: #e8f5e9;
+$danger-soft: #ffebee;
+$warning-soft: #fff3e0;
+
+.bg-gradient-primary {
+  background: $primary-gradient;
+}
+
+.card {
+  transition: transform 0.3s ease;
+}
+
+// Summary Box Styling
+.summary-box {
+  padding: 1.25rem;
+  border-radius: 1rem;
+  text-align: center;
+  height: 100%;
+  
+  label {
+    display: block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.5px;
+  }
+  
+  .amount {
+    font-size: 1.1rem;
+    color: #2d3436;
+  }
+
+  &.blue { background-color: #f0f7ff; color: #0056b3; border: 1px solid #d0e3ff; }
+  &.orange { background-color: #fff8f0; color: #d35400; border: 1px solid #ffe8cc; }
+  &.green { background-color: #f0fff4; color: #1e7e34; border: 1px solid #c3e6cb; }
+}
+
+// Section Titles
+.section-title {
+  position: relative;
+  padding-left: 15px;
+  font-weight: 700;
+  color: #4a4a4a;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 5px;
+    bottom: 5px;
+    width: 4px;
+    background: #4e73df;
+    border-radius: 2px;
+  }
+}
+
+// Custom Select
+.custom-select {
+  border: 2px solid #e9ecef;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  
+  &:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.1);
+  }
+}
+
+// Savings Banner
+.savings-banner {
+  background: $success-soft;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  border: 1px dashed #28a745;
+}
+
+.icon-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+// Soft Alerts
+.alert-danger-soft { background-color: $danger-soft; color: #c0392b; border: none; }
+.alert-success-soft { background-color: $success-soft; color: #27ae60; border: none; }
+.alert-warning-soft { background-color: $warning-soft; color: #d35400; border: none; }
+
+// Animation
+.confirmation-view {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Invoice Specific Styles
+.invoice-card {
+  position: relative;
+  background: #fff;
+  color: #333;
+}
+
+.success-icon-wrapper {
+  width: 80px;
+  height: 80px;
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  margin: 0 auto;
+}
+
+.paid-stamp {
+  display: inline-block;
+  padding: 10px 20px;
+  border: 4px solid #2e7d32;
+  color: #2e7d32;
+  font-weight: 900;
+  text-transform: uppercase;
+  border-radius: 8px;
+  transform: rotate(-15deg);
+  opacity: 0.4;
+  font-size: 1.5rem;
+}
+
+// Print Optimization
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printableInvoice, #printableInvoice * {
+    visibility: visible;
+  }
+  #printableInvoice {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  .d-print-none {
+    display: none !important;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-in-out;
+}

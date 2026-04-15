@@ -1,0 +1,369 @@
+<div class="loan-dashboard-container">
+  <!-- Header Section -->
+  <div class="dashboard-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="mb-1">
+          <i class="bi bi-speedometer2 me-2"></i>
+          {{ isCustomer ? 'My Loan Dashboard' : 'Loan Management Dashboard' }}
+        </h2>
+        <p class="text-muted mb-0">
+          {{ isCustomer ? 'Overview of your loan applications and repayments' : 'Complete overview of all loan applications and statistics' }}
+        </p>
+      </div>
+      <div>
+        <button class="btn btn-outline-primary me-2" (click)="refresh()" [disabled]="loading">
+          <i class="bi bi-arrow-clockwise me-1"></i>
+          Refresh
+        </button>
+        <button *ngIf="isCustomer" class="btn btn-primary" (click)="navigateToApplyLoan()">
+          <i class="bi bi-plus-circle me-1"></i>
+          Apply for Loan
+        </button>
+        <button *ngIf="!isCustomer" class="btn btn-primary" (click)="navigateToSearch()">
+          <i class="bi bi-search me-1"></i>
+          Advanced Search
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-3 text-muted">Loading dashboard data...</p>
+  </div>
+
+  <!-- Error Alert -->
+  <div *ngIf="error && !loading" class="alert alert-warning alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    {{ error }}
+    <button type="button" class="btn-close" (click)="error = null"></button>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div *ngIf="!loading && !error">
+    
+    <!-- Statistics Cards -->
+    <div class="row g-3 mb-4">
+      <!-- Total Loans -->
+      <div class="col-md-6 col-lg-3">
+        <div class="card stats-card h-100 border-0 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <p class="text-muted mb-1 small">Total Loans</p>
+                <h3 class="mb-0 fw-bold">{{ statistics.totalLoans }}</h3>
+              </div>
+              <div class="stats-icon bg-primary bg-opacity-10 text-primary rounded-circle p-3">
+                <i class="bi bi-file-text fs-4"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pending Approvals -->
+      <div class="col-md-6 col-lg-3">
+        <div class="card stats-card h-100 border-0 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <p class="text-muted mb-1 small">Pending Approvals</p>
+                <h3 class="mb-0 fw-bold">{{ statistics.pendingApprovals }}</h3>
+              </div>
+              <div class="stats-icon bg-warning bg-opacity-10 text-warning rounded-circle p-3">
+                <i class="bi bi-clock-history fs-4"></i>
+              </div>
+            </div>
+            <button *ngIf="!isCustomer && statistics.pendingApprovals > 0" 
+                    class="btn btn-sm btn-outline-warning mt-2 w-100"
+                    (click)="navigateToPendingApprovals()">
+              <i class="bi bi-eye me-1"></i>
+              View Pending
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Loans -->
+      <div class="col-md-6 col-lg-3">
+        <div class="card stats-card h-100 border-0 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <p class="text-muted mb-1 small">Active Loans</p>
+                <h3 class="mb-0 fw-bold">{{ statistics.activeLoans }}</h3>
+              </div>
+              <div class="stats-icon bg-success bg-opacity-10 text-success rounded-circle p-3">
+                <i class="bi bi-check-circle fs-4"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Closed Loans -->
+      <div class="col-md-6 col-lg-3">
+        <div class="card stats-card h-100 border-0 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <p class="text-muted mb-1 small">Closed Loans</p>
+                <h3 class="mb-0 fw-bold">{{ statistics.closedLoans }}</h3>
+              </div>
+              <div class="stats-icon bg-secondary bg-opacity-10 text-secondary rounded-circle p-3">
+                <i class="bi bi-check-all fs-4"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Financial Summary Cards -->
+    <div class="row g-3 mb-4">
+      <!-- Total Principal -->
+      <div class="col-md-6 col-xl-3">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-body">
+            <p class="text-muted mb-1 small">
+              <i class="bi bi-wallet2 me-1"></i>
+              Total Principal
+            </p>
+            <h4 class="mb-0 text-primary fw-bold">{{ formatAmount(statistics.totalPrincipal) }}</h4>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Outstanding -->
+      <div class="col-md-6 col-xl-3">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-body">
+            <p class="text-muted mb-1 small">
+              <i class="bi bi-exclamation-circle me-1"></i>
+              Total Outstanding
+            </p>
+            <h4 class="mb-0 text-danger fw-bold">{{ formatAmount(statistics.totalOutstanding) }}</h4>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Disbursed -->
+      <div class="col-md-6 col-xl-3">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-body">
+            <p class="text-muted mb-1 small">
+              <i class="bi bi-cash-stack me-1"></i>
+              Total Disbursed
+            </p>
+            <h4 class="mb-0 text-success fw-bold">{{ formatAmount(statistics.totalDisbursed) }}</h4>
+          </div>
+        </div>
+      </div>
+
+      <!-- Monthly EMI Collection -->
+      <div class="col-md-6 col-xl-3">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-body">
+            <p class="text-muted mb-1 small">
+              <i class="bi bi-calendar-check me-1"></i>
+              Monthly EMI
+            </p>
+            <h4 class="mb-0 text-info fw-bold">{{ formatAmount(statistics.monthlyEMICollection) }}</h4>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts and Distribution -->
+    <div class="row g-3 mb-4">
+      <!-- Loan Type Distribution -->
+      <div class="col-lg-6">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-header bg-white border-0 py-3">
+            <h5 class="mb-0">
+              <i class="bi bi-pie-chart me-2"></i>
+              Loan Type Distribution
+            </h5>
+          </div>
+          <div class="card-body">
+            <div *ngIf="loanTypeDistribution.length > 0; else noData">
+              <div *ngFor="let dist of loanTypeDistribution" class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <span class="fw-medium">{{ formatLoanType(dist.type) }}</span>
+                  <span class="badge bg-primary">{{ dist.count }} loans</span>
+                </div>
+                <div class="progress" style="height: 25px;">
+                  <div class="progress-bar" 
+                       role="progressbar" 
+                       [style.width.%]="dist.percentage"
+                       [style.background-color]="getTypeColor(dist.type)">
+                    {{ dist.percentage | number:'1.1-1' }}%
+                  </div>
+                </div>
+                <small class="text-muted">{{ formatAmount(dist.totalAmount) }}</small>
+              </div>
+            </div>
+            <ng-template #noData>
+              <div class="text-center py-4 text-muted">
+                <i class="bi bi-inbox fs-1"></i>
+                <p class="mt-2">No loan data available</p>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loan Status Distribution -->
+      <div class="col-lg-6">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-header bg-white border-0 py-3">
+            <h5 class="mb-0">
+              <i class="bi bi-bar-chart me-2"></i>
+              Loan Status Distribution
+            </h5>
+          </div>
+          <div class="card-body">
+            <div *ngIf="statusChartData.length > 0; else noData">
+              <div *ngFor="let status of statusChartData" class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <span class="fw-medium">{{ status.name }}</span>
+                  <span class="badge" [style.background-color]="getStatusColor(status.name)">
+                    {{ status.value }}
+                  </span>
+                </div>
+                <div class="progress" style="height: 25px;">
+                  <div class="progress-bar" 
+                       role="progressbar" 
+                       [style.width.%]="(status.value / statistics.totalLoans) * 100"
+                       [style.background-color]="getStatusColor(status.name)">
+                    {{ (status.value / statistics.totalLoans) * 100 | number:'1.1-1' }}%
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Loans and Pending Approvals -->
+    <div class="row g-3">
+      <!-- Recent Loans -->
+      <div class="col-lg-7">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white border-0 py-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">
+                <i class="bi bi-clock-history me-2"></i>
+                Recent Loan Applications
+              </h5>
+              <button class="btn btn-sm btn-outline-primary" 
+                      (click)="isCustomer ? navigateToMyLoans() : navigateToSearch()">
+                View All
+              </button>
+            </div>
+          </div>
+          <div class="card-body p-0">
+            <div *ngIf="recentLoans.length > 0; else noRecentLoans" class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>Loan ID</th>
+                    <th *ngIf="!isCustomer">Customer</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let loan of recentLoans">
+                    <td class="fw-medium">{{ loan.loanId }}</td>
+                    <td *ngIf="!isCustomer">{{ loan.customerName }}</td>
+                    <td>
+                      <span class="badge bg-secondary">{{ formatLoanType(loan.loanType) }}</span>
+                    </td>
+                    <td class="fw-bold">{{ formatAmount(loan.principal) }}</td>
+                    <td>
+                      <span class="badge" [ngClass]="getLoanStatusBadgeClass(loan.loanStatus)">
+                        {{ formatLoanStatus(loan.loanStatus) }}
+                      </span>
+                    </td>
+                    <td>{{ loan.applicationDate | date:'dd/MM/yyyy' }}</td>
+                    <td>
+                      <button class="btn btn-sm btn-outline-primary" 
+                              (click)="viewLoanDetails(loan.loanId)">
+                        <i class="bi bi-eye"></i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <ng-template #noRecentLoans>
+              <div class="text-center py-4 text-muted">
+                <i class="bi bi-inbox fs-1"></i>
+                <p class="mt-2">No recent loan applications</p>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pending Approvals (Admin/Employee Only) -->
+      <div class="col-lg-5" *ngIf="!isCustomer">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-warning bg-opacity-10 border-0 py-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0 text-warning">
+                <i class="bi bi-hourglass-split me-2"></i>
+                Pending Approvals
+              </h5>
+              <span class="badge bg-warning">{{ pendingApprovalLoans.length }}</span>
+            </div>
+          </div>
+          <div class="card-body p-0">
+            <div *ngIf="pendingApprovalLoans.length > 0; else noPendingApprovals">
+              <div class="list-group list-group-flush">
+                <div *ngFor="let loan of pendingApprovalLoans" 
+                     class="list-group-item list-group-item-action">
+                  <div class="d-flex w-100 justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                      <h6 class="mb-1 fw-bold">{{ loan.loanId }}</h6>
+                      <p class="mb-1 small">{{ loan.customerName }}</p>
+                      <p class="mb-1">
+                        <span class="badge bg-secondary me-1">{{ formatLoanType(loan.loanType) }}</span>
+                        <span class="fw-bold text-primary">{{ formatAmount(loan.principal) }}</span>
+                      </p>
+                      <small class="text-muted">
+                        <i class="bi bi-calendar me-1"></i>
+                        {{ loan.applicationDate | date:'dd/MM/yyyy' }}
+                      </small>
+                    </div>
+                    <button class="btn btn-sm btn-warning" 
+                            (click)="approveOrRejectLoan(loan.loanId)">
+                      <i class="bi bi-pencil-square"></i>
+                      Review
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <ng-template #noPendingApprovals>
+              <div class="text-center py-4 text-muted">
+                <i class="bi bi-check-circle fs-1 text-success"></i>
+                <p class="mt-2">No pending approvals</p>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

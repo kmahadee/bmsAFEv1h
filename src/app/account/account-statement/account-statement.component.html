@@ -1,0 +1,227 @@
+
+<div class="account-statement-container">
+  <div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4 no-print">
+      <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <button class="btn btn-outline-secondary btn-sm me-3" (click)="goBack()">
+              <i class="bi bi-arrow-left me-2"></i>
+              Back
+            </button>
+            <h2 class="d-inline mb-0">
+              <i class="bi bi-file-text text-primary me-2"></i>
+              Account Statement
+            </h2>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-outline-primary" (click)="printStatement()">
+              <i class="bi bi-printer me-2"></i>
+              Print
+            </button>
+            <button class="btn btn-outline-success" (click)="downloadStatement()">
+              <i class="bi bi-download me-2"></i>
+              Download PDF
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Date Range Form -->
+    <div class="card mb-4 no-print">
+      <div class="card-body">
+        <form [formGroup]="statementForm" (ngSubmit)="generateStatement()">
+          <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+              <label for="startDate" class="form-label">Start Date</label>
+              <input
+                type="date"
+                class="form-control"
+                id="startDate"
+                formControlName="startDate"
+                [class.is-invalid]="submitted && f['startDate'].errors"
+              />
+              <div class="invalid-feedback" *ngIf="submitted && f['startDate'].errors">
+                Start date is required
+              </div>
+            </div>
+            <div class="col-md-4">
+              <label for="endDate" class="form-label">End Date</label>
+              <input
+                type="date"
+                class="form-control"
+                id="endDate"
+                formControlName="endDate"
+                [class.is-invalid]="submitted && f['endDate'].errors"
+              />
+              <div class="invalid-feedback" *ngIf="submitted && f['endDate'].errors">
+                End date is required
+              </div>
+            </div>
+            <div class="col-md-4">
+              <button type="submit" class="btn btn-primary w-100" [disabled]="loading">
+                <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+                <i *ngIf="!loading" class="bi bi-file-text me-2"></i>
+                Generate Statement
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <app-loading-spinner *ngIf="loading" message="Generating statement..."></app-loading-spinner>
+
+    <!-- Statement Content -->
+    <div *ngIf="!loading && statement" class="statement-content">
+      <!-- Statement Header -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <h3 class="mb-3">
+                <i class="bi bi-bank2 text-primary me-2"></i>
+                Bank Management System
+              </h3>
+              <p class="mb-1"><strong>Account Statement</strong></p>
+              <p class="text-muted mb-0">Generated on {{ statement.statementEndDate | date:'medium' }}</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+              <p class="mb-1"><strong>Account Number:</strong> {{ statement.accountNumber }}</p>
+              <p class="mb-1"><strong>Account Type:</strong> {{ statement.accountType }}</p>
+              <p class="mb-1"><strong>Branch:</strong> {{ statement.branch }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Customer Information -->
+      <div class="card mb-4">
+        <div class="card-header bg-white">
+          <h5 class="mb-0">Customer Information</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <p class="mb-1"><strong>Name:</strong> {{ statement.customerName }}</p>
+              <p class="mb-1"><strong>Email:</strong> {{ statement.customerEmail }}</p>
+            </div>
+            <div class="col-md-6">
+              <p class="mb-1"><strong>Statement Period:</strong></p>
+              <p class="mb-0">
+                {{ statement.statementStartDate | date:'mediumDate' }} to 
+                {{ statement.statementEndDate | date:'mediumDate' }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="row mb-4">
+        <div class="col-md-3">
+          <div class="card text-center">
+            <div class="card-body">
+              <h6 class="text-muted mb-2">Opening Balance</h6>
+              <h4 class="mb-0">{{ statement.openingBalance | number:'1.2-2' }}</h4>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-center">
+            <div class="card-body">
+              <h6 class="text-muted mb-2">Total Credits</h6>
+              <h4 class="mb-0 text-success">+{{ statement.totalCredits | number:'1.2-2' }}</h4>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-center">
+            <div class="card-body">
+              <h6 class="text-muted mb-2">Total Debits</h6>
+              <h4 class="mb-0 text-danger">-{{ statement.totalDebits | number:'1.2-2' }}</h4>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-center bg-primary text-white">
+            <div class="card-body">
+              <h6 class="opacity-75 mb-2">Closing Balance</h6>
+              <h4 class="mb-0">{{ statement.closingBalance | number:'1.2-2' }}</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transactions Table -->
+      <div class="card">
+        <div class="card-header bg-white">
+          <h5 class="mb-0">
+            Transaction History
+            <span class="badge bg-primary ms-2">{{ statement.transactionCount }} Transactions</span>
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-bordered table-sm">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Transaction ID</th>
+                  <th>Description</th>
+                  <th>Type</th>
+                  <th>Other Account</th>
+                  <th class="text-end">Debit</th>
+                  <th class="text-end">Credit</th>
+                  <th class="text-end">Balance</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let txn of statement.transactions">
+                  <td>{{ txn.timestamp | date:'short' }}</td>
+                  <td><small>{{ txn.transactionId }}</small></td>
+                  <td>{{ txn.description || 'N/A' }}</td>
+                  <td>
+                    <span class="badge" [ngClass]="{
+                      'bg-danger': txn.transactionType === 'DEBIT',
+                      'bg-success': txn.transactionType === 'CREDIT'
+                    }">
+                      {{ txn.transactionType }}
+                    </span>
+                  </td>
+                  <td><small>{{ txn.otherAccountNumber }}</small></td>
+                  <td class="text-end text-danger">
+                    {{ txn.transactionType === 'DEBIT' ? (txn.amount | number:'1.2-2') : '-' }}
+                  </td>
+                  <td class="text-end text-success">
+                    {{ txn.transactionType === 'CREDIT' ? (txn.amount | number:'1.2-2') : '-' }}
+                  </td>
+                  <td class="text-end"><strong>{{ txn.balanceAfter | number:'1.2-2' }}</strong></td>
+                </tr>
+                <tr *ngIf="statement.transactions.length === 0">
+                  <td colspan="8" class="text-center text-muted py-3">
+                    No transactions found in this period
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Note -->
+      <div class="card mt-4">
+        <div class="card-body">
+          <p class="mb-0 small text-muted">
+            <i class="bi bi-info-circle me-2"></i>
+            This is a computer-generated statement and does not require a signature. 
+            For any queries, please contact your branch or customer service.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

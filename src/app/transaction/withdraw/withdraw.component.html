@@ -1,0 +1,95 @@
+<div class="withdraw-container py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-6">
+        
+        <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+          <div class="card-header bg-primary text-white py-3 border-0">
+            <h4 class="mb-0 d-flex align-items-center">
+              <i class="bi bi-bank me-2"></i> Withdraw Funds
+            </h4>
+          </div>
+
+          <div class="card-body p-4 p-md-5">
+            
+            <div *ngIf="error" class="alert alert-danger d-flex align-items-center mb-4 border-0 shadow-sm" role="alert">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              <div>{{ error }}</div>
+            </div>
+
+            <div *ngIf="success" class="alert alert-success d-flex align-items-center mb-4 border-0 shadow-sm" role="alert">
+              <i class="bi bi-check-circle-fill me-2"></i>
+              <div>{{ success }}</div>
+            </div>
+
+            <form [formGroup]="withdrawForm" (ngSubmit)="onSubmit()">
+              
+              <div class="mb-4">
+                <label class="form-label fw-bold text-secondary">Select Account</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light border-end-0"><i class="bi bi-credit-card-2-front"></i></span>
+                  <select formControlName="accountNumber" class="form-select border-start-0" 
+                    [ngClass]="{ 'is-invalid': submitted && f['accountNumber'].errors }">
+                    <option value="" disabled>Choose account...</option>
+                    <option *ngFor="let acc of myAccounts" [value]="acc.accountNumber">
+                      {{ acc.accountNumber }} ({{ acc.accountType }})
+                    </option>
+                  </select>
+                </div>
+                
+                <div class="balance-badge mt-2 p-2 rounded bg-light border d-flex justify-content-between align-items-center">
+                  <span class="text-muted small">Available Balance:</span>
+                  <span class="fw-bold text-primary">{{ selectedAccountBalance | currency }}</span>
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label fw-bold text-secondary">Withdrawal Amount</label>
+                <div class="input-group input-group-lg">
+                  <span class="input-group-text bg-white border-end-0 text-muted">$</span>
+                  <input type="number" formControlName="amount" class="form-control border-start-0 ps-0" 
+                    placeholder="0.00" [ngClass]="{ 'is-invalid': submitted && f['amount'].errors }">
+                </div>
+                <div *ngIf="submitted && f['amount'].errors" class="text-danger small mt-1">
+                  <span *ngIf="f['amount'].errors['required']">Amount is required.</span>
+                  <span *ngIf="f['amount'].errors['min']">Minimum withdrawal is $0.01.</span>
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label fw-bold text-secondary">Withdrawal Method</label>
+                <div class="d-flex gap-2 flex-wrap">
+                  <div *ngFor="let mode of withdrawalModes">
+                    <input type="radio" class="btn-check" [id]="mode" [value]="mode" formControlName="withdrawalMode">
+                    <label class="btn btn-outline-secondary btn-sm px-4 rounded-pill" [for]="mode">{{ mode }}</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label fw-bold text-secondary">Description (Optional)</label>
+                <textarea formControlName="description" class="form-control bg-light" rows="2" 
+                  placeholder="e.g. Utility bill payment"></textarea>
+              </div>
+
+              <div class="d-grid gap-2 pt-2">
+                <button type="submit" [disabled]="loading" class="btn btn-primary btn-lg rounded-pill shadow-sm py-3 fw-bold">
+                  <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+                  <i *ngIf="!loading" class="bi bi-wallet2 me-2"></i>
+                  Confirm Withdrawal
+                </button>
+                <button type="button" class="btn btn-link text-muted" (click)="withdrawForm.reset()">Cancel</button>
+              </div>
+
+            </form>
+          </div>
+        </div>
+        
+        <p class="text-center text-muted small mt-4">
+          <i class="bi bi-shield-lock"></i> Securely processed by DemoBank Infrastructure
+        </p>
+
+      </div>
+    </div>
+  </div>
+</div>

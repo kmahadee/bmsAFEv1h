@@ -1,0 +1,186 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container-fluid">
+    <a class="navbar-brand" routerLink="/">
+      <i class="bi bi-bank2 me-2"></i>
+      Bank Management System
+    </a>
+
+    <button class="navbar-toggler" type="button" (click)="toggleNavbar()" [attr.aria-expanded]="!isCollapsed">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" [class.show]="!isCollapsed">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item" *ngIf="currentUser && !isManager()">
+          <a class="nav-link" routerLink="/dashboard" routerLinkActive="active">
+            <i class="bi bi-speedometer2 me-1"></i>
+            Dashboard
+          </a>
+        </li>
+        <li class="nav-item" *ngIf="isManager()">
+          <a class="nav-link" routerLink="/dashboard/branch-dashboard" routerLinkActive="active">
+            <i class="bi bi-speedometer2 me-1"></i>
+            Dashboard
+          </a>
+        </li>
+
+        <!-- Admin Menu -->
+        <li class="nav-item dropdown" *ngIf="isAdmin() || isManager()">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+            <i class="bi bi-people me-1"></i>
+            Customers
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" routerLink="/customer/list">All Customers</a></li>
+            <li><a class="dropdown-item" routerLink="/customer/create">Add Customer</a></li>
+          </ul>
+        </li>
+
+        <li class="nav-item dropdown" *ngIf="isAdmin() || isManager()">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+            <i class="bi bi-wallet2 me-1"></i>
+            Accounts
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" routerLink="/account/list">All Accounts</a></li>
+            <li><a class="dropdown-item" routerLink="/account/create">Create Account</a></li>
+          </ul>
+        </li>
+
+        <li class="nav-item dropdown" *ngIf="isAdmin()">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+            <i class="bi bi-building me-1"></i>
+            Branches
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" routerLink="/branch/list">All Branches</a></li>
+            <li><a class="dropdown-item" routerLink="/branch/create">Add Branch</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown" *ngIf="isAdmin() || isManager()">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+            <i class="bi bi-building me-1"></i>
+            DPS
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" routerLink="/dps/list">All DPS</a></li>
+            <li><a class="dropdown-item" routerLink="/dps/create">Create DPS</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown" *ngIf="isAdmin() || isManager() || isCard()">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+            <i class="bi bi-building me-1"></i>
+            Cards
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" routerLink="/cards/list">All Cards</a></li>
+            <li><a class="dropdown-item" routerLink="/cards/issue">Create Card</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown" *ngIf="isAdmin() || isManager() || isCustomer() || isLoan()">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+            <i class="bi bi-cash-stack me-1"></i>
+            Loans
+          </a>
+          <ul class="dropdown-menu" *ngIf="isAdmin() || isManager() || isCustomer() || isLoan()">
+            <!-- Common for customers -->
+            <li><a class="dropdown-item" routerLink="/loans/apply" *ngIf="isCustomer()">Apply for Loan</a></li>
+            <li><a class="dropdown-item" routerLink="/loans/my-loans" *ngIf="isCustomer()">My Loans</a></li>
+            <li *ngIf="isCustomer()">
+              <a class="dropdown-item" routerLink="/loans/customerloans">Customer Loans</a>
+            </li>
+            <!-- <li>
+              <hr class="dropdown-divider" *ngIf="isAdmin()">
+            </li> -->
+
+            <!-- Admin/Employee only -->
+            <li *ngIf="isAdmin() || isManager() || isLoan()">
+              <a class="dropdown-item" routerLink="/loans/pending-approvals">Pending Approvals</a>
+            </li>
+            <li *ngIf="isAdmin() || isManager() || isLoan()">
+              <a class="dropdown-item" routerLink="/loans/search">Search Loans</a>
+            </li>
+            <li *ngIf="isAdmin() || isManager() || isLoan()">
+              <a class="dropdown-item" routerLink="/loans/LoanDashboard">Dashboard Loans</a>
+            </li>
+            
+          </ul>
+        </li>
+        <!-- <li class="nav-item" *ngIf="isAdmin()">
+          <a class="nav-link" routerLink="/dps/list" routerLinkActive="active">
+            <i class="bi bi-piggy-bank me-1"></i>
+            DPS
+          </a>
+        </li> -->
+
+        <!-- Customer Menu -->
+        <li class="nav-item" *ngIf="isCustomer()">
+          <a class="nav-link" routerLink="/account/list" routerLinkActive="active">
+            <i class="bi bi-wallet2 me-1"></i>
+            My Accounts
+          </a>
+        </li>
+
+        <li class="nav-item dropdown" *ngIf="isCustomer()">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+            <i class="bi bi-arrow-left-right me-1"></i>
+            Transactions
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" routerLink="/transaction/transfer">Transfer Funds</a></li>
+            <li><a class="dropdown-item" routerLink="/transaction/deposit">Deposit</a></li>
+            <li><a class="dropdown-item" routerLink="/transaction/withdraw">Withdraw</a></li>
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+            <li><a class="dropdown-item" routerLink="/transaction/history">Transaction History</a></li>
+          </ul>
+        </li>
+
+        <li class="nav-item" *ngIf="isCustomer()">
+          <a class="nav-link" routerLink="/dps/list" routerLinkActive="active">
+            <i class="bi bi-piggy-bank me-1"></i>
+            DPS
+          </a>
+        </li>
+        <li class="nav-item" *ngIf="isCustomer()">
+          <a class="nav-link" routerLink="/customer/cards" routerLinkActive="active">
+            <i class="bi bi-piggy-bank me-1"></i>
+            Cards
+          </a>
+        </li>
+
+      </ul>
+
+      <ul class="navbar-nav ms-auto" *ngIf="currentUser">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+            <i class="bi bi-person-circle me-1"></i>
+            {{ currentUser.username }}
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" routerLink="/profile">
+                <i class="bi bi-person me-2"></i>Profile
+              </a></li>
+            <li><a class="dropdown-item" routerLink="/settings">
+                <i class="bi bi-gear me-2"></i>Settings
+              </a></li>
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+            <li><a class="dropdown-item" href="#" (click)="logout()">
+                <i class="bi bi-box-arrow-right me-2"></i>Logout
+              </a></li>
+          </ul>
+        </li>
+      </ul>
+
+      <div class="navbar-nav ms-auto" *ngIf="!currentUser">
+        <a class="btn btn-outline-light" routerLink="/auth/login">
+          <i class="bi bi-box-arrow-in-right me-1"></i>
+          Login
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>

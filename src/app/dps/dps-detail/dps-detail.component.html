@@ -1,0 +1,301 @@
+<div class="container-fluid mt-4">
+  <!-- Header -->
+  <div class="row mb-4">
+    <div class="col-md-8">
+      <button class="btn btn-link text-decoration-none p-0 mb-2" (click)="goBack()">
+        <i class="bi bi-arrow-left me-2"></i>Back to DPS List
+      </button>
+      <h2 class="mb-0">
+        <i class="bi bi-piggy-bank-fill me-2"></i>
+        DPS Account Details
+      </h2>
+      <p class="text-muted" *ngIf="dps">{{ dps.dpsNumber }}</p>
+    </div>
+    <div class="col-md-4 text-end" *ngIf="dps">
+      <span [class]="getStatusBadgeClass(dps.status)" class="fs-5">
+        {{ dps.status | titlecase }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Error Alert -->
+  <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    {{ error }}
+    <button type="button" class="btn-close" (click)="error = ''" aria-label="Close"></button>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2 text-muted">Loading DPS details...</p>
+  </div>
+
+  <!-- DPS Details -->
+  <div *ngIf="!loading && dps">
+    <!-- Action Buttons -->
+    <div class="card mb-4 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex flex-wrap gap-2">
+          <button 
+            class="btn btn-success" 
+            (click)="makePayment()"
+            [disabled]="dps.status !== 'active'">
+            <i class="bi bi-cash-coin me-2"></i>
+            Make Payment
+          </button>
+          <button 
+            class="btn btn-info" 
+            (click)="viewStatement()">
+            <i class="bi bi-file-text me-2"></i>
+            View Statement
+          </button>
+          <button 
+            class="btn btn-warning" 
+            (click)="openCloseModal()"
+            [disabled]="dps.status !== 'active'">
+            <i class="bi bi-x-circle me-2"></i>
+            Close DPS
+          </button>
+          <button 
+            class="btn btn-primary" 
+            (click)="matureDPS()"
+            [disabled]="dps.status !== 'active' || dps.pendingInstallments > 0">
+            <i class="bi bi-check-circle me-2"></i>
+            Mature DPS
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- Left Column -->
+      <div class="col-lg-6">
+        <!-- Basic Information -->
+        <div class="card mb-4 shadow-sm">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+              <i class="bi bi-info-circle me-2"></i>
+              Basic Information
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="row mb-3">
+              <div class="col-sm-5 fw-bold">DPS Number:</div>
+              <div class="col-sm-7">{{ dps.dpsNumber }}</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-sm-5 fw-bold">Customer Name:</div>
+              <div class="col-sm-7">{{ dps.customerName }}</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-sm-5 fw-bold">Customer ID:</div>
+              <div class="col-sm-7">{{ dps.customerId }}</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-sm-5 fw-bold">Branch:</div>
+              <div class="col-sm-7">{{ dps.branchName }}</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-sm-5 fw-bold">Linked Account:</div>
+              <div class="col-sm-7">
+                {{ dps.linkedAccountNumber || 'Not Linked' }}
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-sm-5 fw-bold">Auto Debit:</div>
+              <div class="col-sm-7">
+                <span *ngIf="dps.autoDebitEnabled" class="badge bg-success">Enabled</span>
+                <span *ngIf="!dps.autoDebitEnabled" class="badge bg-secondary">Disabled</span>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-5 fw-bold">Created Date:</div>
+              <div class="col-sm-7">{{ formatDate(dps.createdDate) }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Financial Details -->
+        <div class="card mb-4 shadow-sm">
+          <div class="card-header bg-success text-white">
+            <h5 class="mb-0">
+              <i class="bi bi-currency-dollar me-2"></i>
+              Financial Details
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="row mb-3">
+              <div class="col-sm-5 fw-bold">Monthly Installment:</div>
+              <div class="col-sm-7 text-primary fs-5">
+                {{ formatCurrency(dps.monthlyInstallment) }}
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-sm-5 fw-bold">Tenure:</div>
+              <div class="col-sm-7">{{ dps.tenureMonths }} months</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-sm-5 fw-bold">Interest Rate:</div>
+              <div class="col-sm-7">{{ dps.interestRate }}% per annum</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-sm-5 fw-bold">Maturity Amount:</div>
+              <div class="col-sm-7 text-success fs-4 fw-bold">
+                {{ formatCurrency(dps.maturityAmount) }}
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-sm-5 fw-bold">Total Deposited:</div>
+              <div class="col-sm-7">{{ formatCurrency(dps.totalDeposited) }}</div>
+            </div>
+            <div class="row">
+              <div class="col-sm-5 fw-bold">Penalty Amount:</div>
+              <div class="col-sm-7 text-danger">
+                {{ formatCurrency(dps.penaltyAmount) }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column -->
+      <div class="col-lg-6">
+        <!-- Payment Status -->
+        <div class="card mb-4 shadow-sm">
+          <div class="card-header bg-info text-white">
+            <h5 class="mb-0">
+              <i class="bi bi-calendar-check me-2"></i>
+              Payment Status
+            </h5>
+          </div>
+          <div class="card-body">
+            <!-- Progress Bar -->
+            <div class="mb-4">
+              <div class="d-flex justify-content-between mb-2">
+                <span class="fw-bold">Payment Progress</span>
+                <span>{{ dps.totalInstallmentsPaid }} / {{ dps.tenureMonths }}</span>
+              </div>
+              <div class="progress" style="height: 25px;">
+                <div 
+                  class="progress-bar bg-success" 
+                  role="progressbar" 
+                  [style.width.%]="calculateProgress()"
+                  [attr.aria-valuenow]="calculateProgress()"
+                  aria-valuemin="0" 
+                  aria-valuemax="100">
+                  {{ calculateProgress().toFixed(1) }}%
+                </div>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-sm-6 fw-bold">Installments Paid:</div>
+              <div class="col-sm-6">
+                <span class="badge bg-success fs-6">
+                  {{ dps.totalInstallmentsPaid }}
+                </span>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-sm-6 fw-bold">Pending Installments:</div>
+              <div class="col-sm-6">
+                <span class="badge bg-warning text-dark fs-6">
+                  {{ dps.pendingInstallments }}
+                </span>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-sm-6 fw-bold">Missed Installments:</div>
+              <div class="col-sm-6">
+                <span class="badge bg-danger fs-6">
+                  {{ dps.missedInstallments }}
+                </span>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-sm-6 fw-bold">Next Payment Date:</div>
+              <div class="col-sm-6">
+                <span *ngIf="dps.nextPaymentDate">
+                  {{ formatDate(dps.nextPaymentDate) }}
+                </span>
+                <span *ngIf="!dps.nextPaymentDate" class="text-muted">-</span>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-sm-6 fw-bold">Start Date:</div>
+              <div class="col-sm-6">{{ formatDate(dps.startDate) }}</div>
+            </div>
+            <div class="row">
+              <div class="col-sm-6 fw-bold">Maturity Date:</div>
+              <div class="col-sm-6">{{ formatDate(dps.maturityDate) }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Days to Maturity Card -->
+        <div class="card mb-4 shadow-sm border-start border-primary border-4">
+          <div class="card-body text-center">
+            <h6 class="text-muted">Days to Maturity</h6>
+            <h2 class="display-4 text-primary mb-0">{{ calculateDaysToMaturity() }}</h2>
+            <small class="text-muted">days remaining</small>
+          </div>
+        </div>
+
+        <!-- Nominee Information -->
+        <div class="card mb-4 shadow-sm" *ngIf="dps.nomineeFirstName">
+          <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0">
+              <i class="bi bi-person-badge me-2"></i>
+              Nominee Information
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="row mb-2">
+              <div class="col-sm-5 fw-bold">Nominee Name:</div>
+              <div class="col-sm-7">
+                {{ dps.nomineeFirstName }} {{ dps.nomineeLastName }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Close DPS Modal -->
+  <div class="modal" [class.show]="showCloseModal" [style.display]="showCloseModal ? 'block' : 'none'" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Close DPS Account</h5>
+          <button type="button" class="btn-close" (click)="closeModal()"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to close this DPS account?</p>
+          <div class="mb-3">
+            <label class="form-label">Reason for Closure</label>
+            <textarea 
+              class="form-control" 
+              rows="3" 
+              [(ngModel)]="closeReason"
+              placeholder="Enter reason for closing this DPS account"></textarea>
+          </div>
+          <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            This action cannot be undone. The DPS will be closed immediately.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+          <button type="button" class="btn btn-danger" (click)="confirmClose()">
+            Confirm Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade" [class.show]="showCloseModal" *ngIf="showCloseModal"></div>
+</div>

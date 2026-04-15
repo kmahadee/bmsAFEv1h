@@ -1,0 +1,144 @@
+<div class="container-fluid py-4">
+  <div class="d-md-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold text-primary mb-1">My Loans</h2>
+      <p class="text-muted">Manage and track your loan applications and active balances</p>
+    </div>
+    <button (click)="applyForLoan()" class="btn btn-gradient-primary shadow-sm px-4 py-2">
+      <i class="bi bi-plus-lg me-2"></i>Apply New Loan
+    </button>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card stat-card border-0 shadow-sm bg-blue-light">
+        <div class="card-body">
+          <h6 class="text-uppercase fw-semibold text-blue mb-2">Total Loans</h6>
+          <h3 class="mb-0">{{ stats.totalLoans }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card stat-card border-0 shadow-sm bg-green-light">
+        <div class="card-body">
+          <h6 class="text-uppercase fw-semibold text-green mb-2">Active Loans</h6>
+          <h3 class="mb-0">{{ stats.activeLoans }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card stat-card border-0 shadow-sm bg-purple-light">
+        <div class="card-body">
+          <h6 class="text-uppercase fw-semibold text-purple mb-2">Total Outstanding</h6>
+          <h3 class="mb-0">${{ stats.totalOutstanding | number:'1.2-2' }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card stat-card border-0 shadow-sm bg-orange-light">
+        <div class="card-body">
+          <h6 class="text-uppercase fw-semibold text-orange mb-2">Total Monthly EMI</h6>
+          <h3 class="mb-0">${{ stats.totalMonthlyEMI | number:'1.2-2' }}</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-3">
+      <div class="row g-3 align-items-center">
+        <div class="col-md-4">
+          <div class="input-group">
+            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+            <input type="text" class="form-control border-start-0" placeholder="Search by Loan ID or Name..." 
+                   [(ngModel)]="searchQuery" (input)="onSearch()">
+          </div>
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" [(ngModel)]="selectedStatus" (change)="onStatusFilterChange()">
+            <option *ngFor="let opt of statusOptions" [value]="opt.value">{{ opt.label }}</option>
+          </select>
+        </div>
+        <div class="col-md-2 ms-auto text-end">
+          <button class="btn btn-outline-secondary btn-sm" (click)="refresh()">
+            <i class="bi bi-arrow-clockwise me-1"></i> Refresh
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="mt-2 text-muted">Fetching your loan details...</p>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger border-0 shadow-sm">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ errorMessage }}
+  </div>
+
+  <div class="row g-4" *ngIf="!loading && filteredLoans.length > 0">
+    <div class="col-xl-4 col-md-6" *ngFor="let loan of filteredLoans">
+      <div class="card h-100 border-0 shadow-hover transition-all">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+              <span class="badge" [ngClass]="{
+                'bg-soft-success text-success': loan.loanStatus === 'APPROVED' || loan.loanStatus === 'ACTIVE',
+                'bg-soft-warning text-warning': loan.loanStatus === 'APPLICATION' || loan.loanStatus === 'PROCESSING',
+                'bg-soft-danger text-danger': loan.loanStatus === 'DEFAULTED',
+                'bg-soft-secondary text-secondary': loan.loanStatus === 'CLOSED'
+              }">{{ loan.loanStatus }}</span>
+              <h5 class="card-title mt-2 mb-0 fw-bold">{{ loan.loanType }}</h5>
+              <small class="text-muted">ID: {{ loan.loanId }}</small>
+            </div>
+            <div class="dropdown">
+              <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-three-dots-vertical fs-5"></i>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                <li><a class="dropdown-item" (click)="viewLoanDetails(loan.loanId)"><i class="bi bi-eye me-2"></i>Details</a></li>
+                <li><a class="dropdown-item" (click)="viewStatement(loan.loanId)"><i class="bi bi-file-earmark-text me-2"></i>Statement</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-6">
+              <label class="small text-muted d-block text-uppercase">Principal</label>
+              <span class="fw-semibold">${{ loan.principal | number }}</span>
+            </div>
+            <div class="col-6 text-end">
+              <label class="small text-muted d-block text-uppercase">EMI</label>
+              <span class="fw-semibold">${{ loan.monthlyEMI | number }}</span>
+            </div>
+          </div>
+
+          <div class="mb-4" *ngIf="loan.loanStatus === 'ACTIVE'">
+            <div class="d-flex justify-content-between mb-1">
+              <span class="small text-muted">Repayment Progress</span>
+              <span class="small fw-bold">{{ getProgress(loan) }}%</span>
+            </div>
+            <div class="progress" style="height: 6px;">
+              <div class="progress-bar bg-primary rounded-pill" role="progressbar" 
+                   [style.width.%]="getProgress(loan)"></div>
+            </div>
+          </div>
+
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end pt-3 border-top">
+            <button *ngIf="canMakePayment(loan)" (click)="makePayment(loan.loanId)" 
+                    class="btn btn-sm btn-primary px-3">Pay EMI</button>
+            <button *ngIf="canForeclose(loan)" (click)="forecloseLoan(loan.loanId)" 
+                    class="btn btn-sm btn-outline-danger px-3">Foreclose</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && filteredLoans.length === 0" class="text-center py-5">
+    <i class="bi bi-inbox fs-1 text-muted"></i>
+    <h4 class="mt-3">No loans found</h4>
+    <p class="text-muted">Try adjusting your filters or apply for a new loan.</p>
+  </div>
+</div>

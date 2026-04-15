@@ -1,0 +1,260 @@
+
+<div class="customer-detail-container">
+  <div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <button class="btn btn-outline-secondary btn-sm me-3" (click)="goBack()">
+              <i class="bi bi-arrow-left me-2"></i>
+              Back
+            </button>
+            <h2 class="d-inline mb-0">
+              <i class="bi bi-person-badge text-primary me-2"></i>
+              Customer Details
+            </h2>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-warning" (click)="editCustomer()">
+              <i class="bi bi-pencil me-2"></i>
+              Edit
+            </button>
+            <button class="btn btn-danger" (click)="deleteCustomer()">
+              <i class="bi bi-trash me-2"></i>
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <app-loading-spinner *ngIf="loading" message="Loading customer details..."></app-loading-spinner>
+
+    <!-- Customer Information -->
+    <div *ngIf="!loading && customer">
+      <!-- Profile Card -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-3 text-center">
+                  <img 
+                    [src]="customer.image || 'assets/img/default-avatar.png'" 
+                    class="img-fluid rounded-circle mb-3" 
+                    style="max-width: 200px;"
+                    alt="Customer Photo"
+                  />
+                  <h4>{{ customer.firstName }} {{ customer.lastName }}</h4>
+                  <p class="text-muted">{{ customer.customerId }}</p>
+                  <div class="mb-2">
+                    <span class="badge" [ngClass]="{
+                      'bg-success': customer.status === 'active',
+                      'bg-danger': customer.status === 'inactive',
+                      'bg-warning': customer.status === 'suspended'
+                    }">
+                      {{ customer.status }}
+                    </span>
+                  </div>
+                  <div>
+                    <span class="badge" [ngClass]="{
+                      'bg-success': customer.kycStatus === 'verified',
+                      'bg-warning': customer.kycStatus === 'pending',
+                      'bg-danger': customer.kycStatus === 'rejected'
+                    }">
+                      KYC: {{ customer.kycStatus }}
+                    </span>
+                  </div>
+                </div>
+                <div class="col-md-9">
+                  <h5 class="mb-3">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Personal Information
+                  </h5>
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label class="text-muted small">Email</label>
+                      <p class="mb-0">{{ customer.email }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="text-muted small">Phone</label>
+                      <p class="mb-0">{{ customer.phone }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="text-muted small">Date of Birth</label>
+                      <p class="mb-0">{{ customer.dateOfBirth | date:'mediumDate' }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="text-muted small">Username</label>
+                      <p class="mb-0">{{ customer.username }}</p>
+                    </div>
+                  </div>
+
+                  <h5 class="mb-3 mt-4">
+                    <i class="bi bi-geo-alt me-2"></i>
+                    Address Information
+                  </h5>
+                  <div class="row">
+                    <div class="col-12 mb-3">
+                      <label class="text-muted small">Street Address</label>
+                      <p class="mb-0">{{ customer.address }}</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                      <label class="text-muted small">City</label>
+                      <p class="mb-0">{{ customer.city }}</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                      <label class="text-muted small">State</label>
+                      <p class="mb-0">{{ customer.state }}</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                      <label class="text-muted small">Zip Code</label>
+                      <p class="mb-0">{{ customer.zipCode }}</p>
+                    </div>
+                  </div>
+
+                  <h5 class="mb-3 mt-4">
+                    <i class="bi bi-clock-history me-2"></i>
+                    Account Information
+                  </h5>
+                  <div class="row">
+                    <div class="col-md-4 mb-3">
+                      <label class="text-muted small">Created Date</label>
+                      <p class="mb-0">{{ customer.createdDate | date:'medium' }}</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                      <label class="text-muted small">Last Updated</label>
+                      <p class="mb-0">{{ customer.lastUpdated | date:'medium' }}</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                      <label class="text-muted small">Active Status</label>
+                      <p class="mb-0">
+                        <span class="badge" [ngClass]="{
+                          'bg-success': customer.isActive,
+                          'bg-danger': !customer.isActive
+                        }">
+                          {{ customer.isActive ? 'Active' : 'Inactive' }}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KYC Actions -->
+      <div class="row mb-4" *ngIf="customer.kycStatus === 'pending'">
+        <div class="col-12">
+          <div class="card border-warning">
+            <div class="card-body">
+              <h5 class="card-title">
+                <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+                KYC Verification Pending
+              </h5>
+              <p class="card-text">This customer's KYC verification is pending. Please review and update the status.</p>
+              <div class="btn-group">
+                <button class="btn btn-success" (click)="updateKycStatus('verified')">
+                  <i class="bi bi-check-circle me-2"></i>
+                  Verify KYC
+                </button>
+                <button class="btn btn-danger" (click)="updateKycStatus('rejected')">
+                  <i class="bi bi-x-circle me-2"></i>
+                  Reject KYC
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistics -->
+      <div class="row mb-4">
+        <div class="col-md-4">
+          <div class="card text-center">
+            <div class="card-body">
+              <i class="bi bi-wallet2 text-primary" style="font-size: 2rem;"></i>
+              <h3 class="mt-2">{{ customer.totalAccounts }}</h3>
+              <p class="text-muted mb-0">Total Accounts</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card text-center">
+            <div class="card-body">
+              <i class="bi bi-credit-card text-success" style="font-size: 2rem;"></i>
+              <h3 class="mt-2">{{ customer.totalCards }}</h3>
+              <p class="text-muted mb-0">Total Cards</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card text-center">
+            <div class="card-body">
+              <i class="bi bi-cash-stack text-warning" style="font-size: 2rem;"></i>
+              <h3 class="mt-2">{{ customer.totalLoans }}</h3>
+              <p class="text-muted mb-0">Total Loans</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Accounts List -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header bg-white">
+              <h5 class="mb-0">
+                <i class="bi bi-wallet2 me-2"></i>
+                Associated Accounts
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Account Number</th>
+                      <th>Type</th>
+                      <th>Branch</th>
+                      <th>Balance</th>
+                      <th>Status</th>
+                      <th>Created Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let account of accounts">
+                      <td>{{ account.accountNumber }}</td>
+                      <td>{{ account.accountType }}</td>
+                      <td>{{ account.branch }}</td>
+                      <td>{{ account.currency }} {{ account.balance | number:'1.2-2' }}</td>
+                      <td>
+                        <span class="badge" [ngClass]="{
+                          'bg-success': account.status === 'active',
+                          'bg-danger': account.status === 'inactive',
+                          'bg-warning': account.status === 'frozen'
+                        }">
+                          {{ account.status }}
+                        </span>
+                      </td>
+                      <td>{{ account.createdDate | date:'short' }}</td>
+                    </tr>
+                    <tr *ngIf="accounts.length === 0">
+                      <td colspan="6" class="text-center text-muted py-4">
+                        No accounts found for this customer
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

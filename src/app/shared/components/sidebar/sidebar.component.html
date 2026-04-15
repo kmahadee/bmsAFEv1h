@@ -1,0 +1,81 @@
+<div class="sidebar" [class.collapsed]="isCollapsed">
+  <button class="btn btn-sm btn-light toggle-btn" (click)="toggleSidebar()">
+    <i class="bi" [ngClass]="isCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'"></i>
+  </button>
+
+  <div class="sidebar-content">
+    <ul class="nav flex-column">
+      <!-- Dashboard -->
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/dashboard" routerLinkActive="active">
+          <i class="bi bi-speedometer2"></i>
+          <span class="nav-text">Dashboard</span>
+        </a>
+      </li>
+
+      <!-- Admin Menu -->
+      <ng-container *ngIf="isAdmin()">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/customer/list" routerLinkActive="active">
+            <i class="bi bi-people"></i>
+            <span class="nav-text">Customers</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/account/list" routerLinkActive="active">
+            <i class="bi bi-wallet2"></i>
+            <span class="nav-text">Accounts</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/branch/list" routerLinkActive="active">
+            <i class="bi bi-building"></i>
+            <span class="nav-text">Branches</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/dps/list" routerLinkActive="active">
+            <i class="bi bi-piggy-bank"></i>
+            <span class="nav-text">DPS Accounts</span>
+          </a>
+        </li>
+      </ng-container>
+
+      <!-- Customer Menu -->
+      <ng-container *ngIf="isCustomer()">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/account/list" routerLinkActive="active">
+            <i class="bi bi-wallet2"></i>
+            <span class="nav-text">My Accounts</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/transaction/transfer" routerLinkActive="active">
+            <i class="bi bi-arrow-left-right"></i>
+            <span class="nav-text">Transfer</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/transaction/history" routerLinkActive="active">
+            <i class="bi bi-clock-history"></i>
+            <span class="nav-text">History</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/dps/list" routerLinkActive="active">
+            <i class="bi bi-piggy-bank"></i>
+            <span class="nav-text">My DPS</span>
+          </a>
+        </li>
+      </ng-container>
+
+      <!-- Common Menu -->
+      <li class="nav-item mt-auto">
+        <a class="nav-link" routerLink="/settings" routerLinkActive="active">
+          <i class="bi bi-gear"></i>
+          <span class="nav-text">Settings</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>

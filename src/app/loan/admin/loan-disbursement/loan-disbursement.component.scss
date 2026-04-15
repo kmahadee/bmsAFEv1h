@@ -1,0 +1,82 @@
+// Custom Variables
+$primary-gradient: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+$success-bg: rgba(25, 135, 84, 0.1);
+$warning-bg: rgba(255, 193, 7, 0.1);
+
+:host {
+  display: block;
+  background-color: #f8f9fc;
+  min-height: 100vh;
+}
+
+// Card Customization
+.card {
+  border-radius: 12px;
+  transition: transform 0.2s ease;
+}
+
+.summary-card {
+  background: white;
+  border-left: 5px solid #4e73df;
+  
+  .text-primary {
+    color: #4e73df !important;
+  }
+}
+
+// Custom Badge Colors
+.bg-success-light {
+  background-color: $success-bg;
+  color: #198754;
+}
+
+.bg-warning-light {
+  background-color: $warning-bg;
+  color: #ffc107;
+}
+
+// Form Controls
+.form-control, .form-select {
+  padding: 0.6rem 1rem;
+  border-color: #e3e6f0;
+  
+  &:focus {
+    border-color: #bac8f3;
+    box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.1);
+  }
+}
+
+.input-group-text {
+  color: #6e707e;
+  border-color: #e3e6f0;
+}
+
+// Buttons
+.btn-primary {
+  background: $primary-gradient;
+  border: none;
+  
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, #2e59d9 0%, #1e3bb3 100%);
+    transform: translateY(-1px);
+  }
+}
+
+// Modal Styling
+.modal-content {
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.min-vh-50 {
+  min-height: 50vh;
+}
+
+// Typography
+h2 {
+  color: #2e384d;
+}
+
+.fw-semibold {
+  letter-spacing: 0.025em;
+}

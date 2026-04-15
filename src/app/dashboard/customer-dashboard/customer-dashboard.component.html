@@ -1,0 +1,377 @@
+<div class="customer-dashboard">
+  <div class="container-fluid">
+
+    <!-- Header -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h2 class="mb-0">
+              <i class="bi bi-speedometer2 text-primary me-2"></i>
+              My Dashboard
+            </h2>
+            <p class="text-muted mb-0">Welcome back, {{ currentUser?.username }}!</p>
+          </div>
+          <div>
+            <span class="badge bg-success">
+              <i class="bi bi-circle-fill me-1"></i>
+              Online
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <app-loading-spinner *ngIf="loading" [overlay]="true" message="Loading your dashboard...">
+    </app-loading-spinner>
+
+    <!-- Account Summary Cards -->
+    <div class="row mb-4">
+
+      <!-- Total Balance -->
+      <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card stat-card border-0 shadow-sm h-100 bg-primary text-white">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-2 opacity-75">Total Balance</h6>
+                <h3 class="mb-0">USD {{ totalBalance | number:'1.2-2' }}</h3>
+                <small class="opacity-75">
+                  Across {{ accounts.length }} accounts
+                </small>
+              </div>
+              <div class="stat-icon-large">
+                <i class="bi bi-wallet2"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Accounts -->
+      <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card stat-card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="text-muted mb-2">Active Accounts</h6>
+                <h3 class="mb-0">{{ activeAccounts }}</h3>
+                <small class="text-muted">
+                  Total: {{ accounts.length }}
+                </small>
+              </div>
+              <div class="stat-icon bg-success">
+                <i class="bi bi-check-circle"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DPS Deposited -->
+      <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card stat-card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="text-muted mb-2">DPS Deposited</h6>
+                <h3 class="mb-0">USD {{ totalDPSDeposited | number:'1.2-2' }}</h3>
+                <small class="text-muted">
+                  {{ activeDPS }} Active DPS
+                </small>
+              </div>
+              <div class="stat-icon bg-warning text-white">
+                <i class="bi bi-piggy-bank"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Cards -->
+      <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card stat-card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="text-muted mb-2">My Cards</h6>
+                <h3 class="mb-0">{{ totalCards }}</h3>
+                <small class="text-muted">
+                  {{ activeCards }} Active
+                </small>
+              </div>
+              <div class="stat-icon bg-danger text-white">
+                <i class="bi bi-credit-card"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white border-0">
+            <h5 class="mb-0">
+              <i class="bi bi-lightning me-2"></i>
+              Quick Actions
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+
+              <div class="col-md-3 col-6 mb-3">
+                <button class="btn btn-outline-primary w-100 action-btn" (click)="navigateTo('/transaction/transfer')">
+                  <i class="bi bi-arrow-left-right d-block mb-2 fs-2"></i>
+                  Transfer
+                </button>
+              </div>
+
+              <div class="col-md-3 col-6 mb-3">
+                <button class="btn btn-outline-success w-100 action-btn" (click)="navigateTo('/transaction/deposit')">
+                  <i class="bi bi-plus-circle d-block mb-2 fs-2"></i>
+                  Deposit
+                </button>
+              </div>
+
+              <div class="col-md-3 col-6 mb-3">
+                <button class="btn btn-outline-danger w-100 action-btn" (click)="navigateTo('/transaction/withdraw')">
+                  <i class="bi bi-dash-circle d-block mb-2 fs-2"></i>
+                  Withdraw
+                </button>
+              </div>
+
+              <div class="col-md-3 col-6 mb-3">
+                <button class="btn btn-outline-info w-100 action-btn" (click)="navigateTo('/transaction/history')">
+                  <i class="bi bi-clock-history d-block mb-2 fs-2"></i>
+                  History
+                </button>
+              </div>
+
+              <div class="col-md-3 col-6 mb-3">
+                <button class="btn btn-outline-danger w-100 action-btn" (click)="navigateTo('/customer/cards')">
+                  <i class="bi bi-credit-card d-block mb-2 fs-2"></i>
+                  My Cards
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- My Accounts & DPS -->
+    <div class="row">
+
+      <!-- My Accounts -->
+      <div class="col-lg-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-white border-0 pb-0">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">
+                <i class="bi bi-wallet2 me-2"></i>
+                My Accounts
+              </h5>
+              <a (click)="navigateTo('/account/list')" class="btn btn-sm btn-outline-primary">
+                View All
+              </a>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="list-group list-group-flush">
+
+              <div *ngFor="let account of accounts.slice(0,5)" class="list-group-item list-group-item-action"
+                (click)="viewAccountDetails(account.id)">
+
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <h6 class="mb-1">{{ account.accountNumber }}</h6>
+                    <small class="text-muted">{{ account.accountType }}</small>
+                  </div>
+                  <div class="text-end">
+                    <h6 class="mb-0">USD {{ account.balance | number:'1.2-2' }}</h6>
+                    <small [ngClass]="{
+                      'text-success': account.status === 'active',
+                      'text-danger': account.status !== 'active'
+                    }">
+                      {{ account.status }}
+                    </small>
+                  </div>
+                </div>
+
+              </div>
+
+              <div *ngIf="accounts.length === 0" class="text-center py-3 text-muted">
+                No accounts found.
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- My DPS -->
+      <div class="col-lg-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-white border-0 pb-0">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">
+                <i class="bi bi-piggy-bank me-2"></i>
+                My DPS
+              </h5>
+              <a (click)="navigateTo('/dps/list')" class="btn btn-sm btn-outline-warning">
+                View All
+              </a>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="list-group list-group-flush">
+
+              <div *ngFor="let dps of dpsAccounts.slice(0,5)" class="list-group-item list-group-item-action"
+                (click)="viewDPSDetails(dps.id)">
+
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <h6 class="mb-1">{{ dps.dpsNumber }}</h6>
+                    <small class="text-muted">
+                      Monthly: USD {{ dps.monthlyAmount }}
+                    </small>
+                  </div>
+                  <div class="text-end">
+                    <h6 class="mb-0">USD {{ dps.totalDeposited }}</h6>
+                    <small [ngClass]="{
+                      'text-success': dps.status === 'active',
+                      'text-danger': dps.status !== 'active'
+                    }">
+                      {{ dps.status }}
+                    </small>
+                  </div>
+                </div>
+
+              </div>
+
+              <div *ngIf="dpsAccounts.length === 0" class="text-center py-3 text-muted">
+                No DPS accounts found.
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- My Cards -->
+      <div class="col-lg-12 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-white border-0 pb-0">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">
+                <i class="bi bi-credit-card me-2"></i>
+                My Cards
+              </h5>
+              <a (click)="navigateTo('/customer/cards')" class="btn btn-sm btn-outline-danger">
+                View All Cards
+              </a>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="row">
+              <div *ngFor="let card of cards.slice(0, 3)" class="col-md-4 mb-3">
+                <div class="card border" (click)="viewCardDetails(card.id)" style="cursor: pointer;">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                      <span class="badge" [ngClass]="{
+                  'bg-primary': card.cardType === 'debit_card',
+                  'bg-success': card.cardType === 'credit_card',
+                  'bg-info': card.cardType === 'prepaid_card'
+                }">
+                        {{ card.cardType | uppercase }}
+                      </span>
+                      <span class="badge" [ngClass]="{
+                  'bg-success': card.status === 'active',
+                  'bg-danger': card.status === 'blocked',
+                  'bg-warning': card.status === 'inactive'
+                }">
+                        {{ card.status | uppercase }}
+                      </span>
+                    </div>
+                    <h6 class="mb-1 font-monospace">{{ card.maskedCardNumber }}</h6>
+                    <p class="mb-0 small text-muted">{{ card.cardHolderName }}</p>
+                    <p class="mb-0 small text-muted">Expires: {{ card.expiryDate | date:'MM/yy' }}</p>
+
+                    <div *ngIf="card.creditLimit" class="mt-2">
+                      <small class="text-muted">Available: ${{ card.availableLimit | number:'1.2-2' }}</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div *ngIf="cards.length === 0" class="col-12 text-center py-3 text-muted">
+                No cards found. Contact your branch to issue a new card.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="row">
+      <div class="col-12 mb-4">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white border-0">
+            <h5 class="mb-0">
+              <i class="bi bi-clock-history me-2"></i>
+              Recent Transactions
+            </h5>
+          </div>
+
+          <div class="card-body">
+
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr *ngFor="let tx of recentTransactions">
+                    <td>{{ tx.date | date:'short' }}</td>
+                    <td>{{ tx.type }}</td>
+                    <td>USD {{ tx.amount }}</td>
+                    <td>
+                      <span class="badge bg-success">{{ tx.status }}</span>
+                    </td>
+                  </tr>
+
+                  <tr *ngIf="recentTransactions.length === 0">
+                    <td colspan="4" class="text-center text-muted py-3">
+                      No recent transactions found.
+                    </td>
+                  </tr>
+                </tbody>
+
+              </table>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

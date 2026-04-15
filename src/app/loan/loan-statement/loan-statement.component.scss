@@ -1,0 +1,91 @@
+// Colors & Variables
+$primary: #4e73df;
+$success: #1cc88a;
+$warning: #f6c23e;
+$danger: #e74a3b;
+$purple: #6f42c1;
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+// Gradient Card Backgrounds
+.gradient-card-blue {
+  background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+}
+.gradient-card-green {
+  background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
+}
+.gradient-card-orange {
+  background: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%);
+}
+.gradient-card-purple {
+  background: linear-gradient(135deg, #6f42c1 0%, #4e26a3 100%);
+}
+
+// Status Badges
+.status-paid {
+  background-color: rgba($success, 0.15);
+  color: darken($success, 10%);
+}
+
+.status-pending {
+  background-color: rgba($primary, 0.15);
+  color: $primary;
+}
+
+.status-overdue {
+  background-color: rgba($danger, 0.15);
+  color: $danger;
+}
+
+.status-waived {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  border: 1px solid #dee2e6;
+}
+
+// Table Styling
+.table {
+  thead th {
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #5a5c69;
+    padding: 1rem;
+    border-top: none;
+  }
+
+  tbody td {
+    padding: 1rem;
+    color: #444;
+    border-color: #f1f1f1;
+  }
+}
+
+// Pagination Customization
+.pagination {
+  .page-link {
+    border: none;
+    margin: 0 3px;
+    border-radius: 4px;
+    color: #4e73df;
+    &:hover { background-color: #f8f9fc; }
+  }
+  .page-item.active .page-link {
+    background-color: #4e73df;
+    color: white;
+  }
+}
+
+// Print Optimization
+@media print {
+  .btn, .breadcrumb, .input-group, .pagination, .card-footer {
+    display: none !important;
+  }
+  .card {
+    border: none !important;
+    box-shadow: none !important;
+  }
+}

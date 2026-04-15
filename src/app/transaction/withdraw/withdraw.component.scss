@@ -1,0 +1,53 @@
+.withdraw-container {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  min-height: 90vh;
+
+  .card {
+    transition: transform 0.3s ease;
+    
+    .card-header {
+      background: linear-gradient(45deg, #0d6efd, #0046af) !important;
+    }
+  }
+
+  .form-label {
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+  }
+
+  .input-group-text {
+    color: #0d6efd;
+    background-color: transparent;
+  }
+
+  .form-control, .form-select {
+    padding: 0.75rem 1rem;
+    border: 1px solid #dee2e6;
+    &:focus {
+      box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+      border-color: #0d6efd;
+    }
+  }
+
+  // Stylish radio buttons
+  .btn-check:checked + .btn-outline-secondary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    color: white;
+  }
+
+  .balance-badge {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  // Large input for amount
+  input[type="number"].form-control-lg {
+    font-weight: 700;
+    color: #212529;
+  }
+}

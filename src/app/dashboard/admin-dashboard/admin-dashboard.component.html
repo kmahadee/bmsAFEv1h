@@ -1,0 +1,363 @@
+<div class="container-fluid py-4">
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-3 text-muted">Loading dashboard data...</p>
+  </div>
+
+  <div *ngIf="!loading">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="mb-1">{{ getDashboardTitle() }}</h2>
+        <p class="text-muted mb-0">Welcome back, {{ currentUser?.username }}!</p>
+      </div>
+    </div>
+
+    <!-- Stats Cards Row -->
+    <div class="row g-3 mb-4">
+      <!-- Customers Card -->
+      <div class="col-xl-2 col-lg-4 col-md-6" *ngIf="canViewCustomers">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <p class="text-muted mb-1 small">Total Customers</p>
+                <h3 class="mb-0">{{ stats.totalCustomers }}</h3>
+                <small class="text-success">
+                  <i class="bi bi-check-circle-fill"></i> {{ stats.activeCustomers }} Active
+                </small>
+              </div>
+              <div class="bg-primary bg-opacity-10 p-3 rounded">
+                <i class="bi bi-people fs-4 text-primary"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Accounts Card -->
+      <div class="col-xl-2 col-lg-4 col-md-6" *ngIf="canViewAccounts">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <p class="text-muted mb-1 small">Total Accounts</p>
+                <h3 class="mb-0">{{ stats.totalAccounts }}</h3>
+                <small class="text-success">
+                  <i class="bi bi-check-circle-fill"></i> {{ stats.activeAccounts }} Active
+                </small>
+              </div>
+              <div class="bg-success bg-opacity-10 p-3 rounded">
+                <i class="bi bi-wallet2 fs-4 text-success"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Branches Card -->
+      <div class="col-xl-2 col-lg-4 col-md-6" *ngIf="canViewBranches">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <p class="text-muted mb-1 small">Total Branches</p>
+                <h3 class="mb-0">{{ stats.totalBranches }}</h3>
+                <small class="text-info" *ngIf="bankStatistics">
+                  <i class="bi bi-building"></i> {{ bankStatistics.activeBranches }} Active
+                </small>
+              </div>
+              <div class="bg-info bg-opacity-10 p-3 rounded">
+                <i class="bi bi-building fs-4 text-info"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cards Card -->
+      <div class="col-xl-2 col-lg-4 col-md-6" *ngIf="canViewCards">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <p class="text-muted mb-1 small">Total Cards</p>
+                <h3 class="mb-0">{{ stats.totalCards }}</h3>
+                <small class="text-warning">
+                  <i class="bi bi-shield-fill-exclamation"></i> {{ stats.blockedCards }} Blocked
+                </small>
+              </div>
+              <div class="bg-warning bg-opacity-10 p-3 rounded">
+                <i class="bi bi-credit-card fs-4 text-warning"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loans Card -->
+      <div class="col-xl-2 col-lg-4 col-md-6" *ngIf="canViewLoans">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <p class="text-muted mb-1 small">Total Loans</p>
+                <h3 class="mb-0">{{ stats.totalLoans }}</h3>
+                <small class="text-warning">
+                  <i class="bi bi-clock-fill"></i> {{ stats.pendingLoans }} Pending
+                </small>
+              </div>
+              <div class="bg-danger bg-opacity-10 p-3 rounded">
+                <i class="bi bi-cash-stack fs-4 text-danger"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DPS Card -->
+      <div class="col-xl-2 col-lg-4 col-md-6" *ngIf="canViewDPS">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <p class="text-muted mb-1 small">Total DPS</p>
+                <h3 class="mb-0">{{ stats.totalDPS }}</h3>
+                <small class="text-success">
+                  <i class="bi bi-check-circle-fill"></i> {{ stats.activeDPS }} Active
+                </small>
+              </div>
+              <div class="bg-secondary bg-opacity-10 p-3 rounded">
+                <i class="bi bi-piggy-bank fs-4 text-secondary"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bank-wide Statistics (Admin Only) -->
+    <div class="row g-3 mb-4" *ngIf="bankStatistics && canViewBranches">
+      <div class="col-12">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-gradient-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-bank2 me-2"></i>Bank-wide Statistics</h5>
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-3">
+                <div class="text-center p-3 bg-light rounded">
+                  <h4 class="text-primary mb-1">{{ formatCurrency(bankStatistics.totalBankBalance) }}</h4>
+                  <p class="text-muted mb-0 small">Total Bank Balance</p>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="text-center p-3 bg-light rounded">
+                  <h4 class="text-success mb-1">{{ formatCurrency(bankStatistics.averageBalancePerAccount) }}</h4>
+                  <p class="text-muted mb-0 small">Avg Balance/Account</p>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="text-center p-3 bg-light rounded">
+                  <h4 class="text-info mb-1">{{ bankStatistics.totalAccounts }}</h4>
+                  <p class="text-muted mb-0 small">Total Accounts</p>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="text-center p-3 bg-light rounded">
+                  <h4 class="text-warning mb-1">{{ bankStatistics.activeAccounts }}</h4>
+                  <p class="text-muted mb-0 small">Active Accounts</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Section (Admin/Branch Manager) -->
+    <div class="row g-3 mb-4" *ngIf="canViewBranches && bankStatistics">
+      <!-- Branch Balance Distribution -->
+      <div class="col-lg-8">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-white border-bottom">
+            <h5 class="mb-0"><i class="bi bi-bar-chart-fill me-2"></i>Branch Balance Distribution</h5>
+          </div>
+          <div class="card-body">
+            <div style="height: 350px; position: relative;">
+              <canvas #branchBalanceChart></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Accounts Distribution -->
+      <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-white border-bottom">
+            <h5 class="mb-0"><i class="bi bi-pie-chart-fill me-2"></i>Accounts Distribution</h5>
+          </div>
+          <div class="card-body">
+            <div style="height: 350px; position: relative;">
+              <canvas #accountsPerBranchChart></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Branch Performance -->
+      <div class="col-lg-7">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-white border-bottom">
+            <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Branch Performance</h5>
+          </div>
+          <div class="card-body">
+            <div style="height: 350px; position: relative;">
+              <canvas #branchPerformanceChart></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Average Balance Trend -->
+      <div class="col-lg-5">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-white border-bottom">
+            <h5 class="mb-0"><i class="bi bi-currency-dollar me-2"></i>Average Balance</h5>
+          </div>
+          <div class="card-body">
+            <div style="height: 350px; position: relative;">
+              <canvas #avgBalanceChart></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Entity Distribution Chart (All roles) -->
+    <div class="row g-3 mb-4" *ngIf="isAdmin() || isBranchManager()">
+      <div class="col-lg-5">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-white border-bottom">
+            <h5 class="mb-0"><i class="bi bi-diagram-3-fill me-2"></i>Banking Entities Overview</h5>
+          </div>
+          <div class="card-body">
+            <div style="height: 350px; position: relative;">
+              <canvas #entityDistributionChart></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Performing Branches -->
+      <div class="col-lg-7" *ngIf="topBranches.length > 0">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-white border-bottom">
+            <h5 class="mb-0"><i class="bi bi-trophy-fill me-2 text-warning"></i>Top Performing Branches</h5>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th>Rank</th>
+                    <th>Branch</th>
+                    <th>City</th>
+                    <th class="text-end">Total Balance</th>
+                    <th class="text-center">Accounts</th>
+                    <th class="text-end">Avg Balance</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let branch of topBranches; let i = index">
+                    <td>
+                      <span class="badge" [ngClass]="{
+                        'bg-warning': i === 0,
+                        'bg-secondary': i === 1,
+                        'bg-info': i === 2,
+                        'bg-light text-dark': i > 2
+                      }">
+                        #{{ i + 1 }}
+                      </span>
+                    </td>
+                    <td>
+                      <strong>{{ branch.branchName }}</strong>
+                      <br>
+                      <small class="text-muted">{{ branch.branchCode }}</small>
+                    </td>
+                    <td>{{ branch.city }}</td>
+                    <td class="text-end">
+                      <strong class="text-primary">{{ formatCurrency(branch.totalBalance) }}</strong>
+                    </td>
+                    <td class="text-center">
+                      <span class="badge bg-info">{{ branch.totalAccounts }}</span>
+                      <br>
+                      <small class="text-success">{{ branch.activeAccounts }} active</small>
+                    </td>
+                    <td class="text-end">
+                      <span class="text-muted">{{ formatCurrency(branch.averageBalance) }}</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row g-3 mb-4">
+      <div class="col-12">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white border-bottom">
+            <h5 class="mb-0"><i class="bi bi-lightning-fill me-2"></i>Quick Actions</h5>
+          </div>
+          <div class="card-body">
+            <div class="row g-2">
+              <div class="col-md-2 col-sm-4 col-6" *ngIf="canViewCustomers">
+                <button class="btn btn-outline-primary w-100" (click)="navigateTo('/dashboard/customers')">
+                  <i class="bi bi-people d-block fs-3 mb-2"></i>
+                  <span class="small">Manage Customers</span>
+                </button>
+              </div>
+              <div class="col-md-2 col-sm-4 col-6" *ngIf="canViewAccounts">
+                <button class="btn btn-outline-success w-100" (click)="navigateTo('/dashboard/accounts')">
+                  <i class="bi bi-wallet2 d-block fs-3 mb-2"></i>
+                  <span class="small">Manage Accounts</span>
+                </button>
+              </div>
+              <div class="col-md-2 col-sm-4 col-6" *ngIf="canViewBranches">
+                <button class="btn btn-outline-info w-100" (click)="navigateTo('/dashboard/branches')">
+                  <i class="bi bi-building d-block fs-3 mb-2"></i>
+                  <span class="small">Manage Branches</span>
+                </button>
+              </div>
+              <div class="col-md-2 col-sm-4 col-6" *ngIf="canViewCards">
+                <button class="btn btn-outline-warning w-100" (click)="navigateTo('/dashboard/cards')">
+                  <i class="bi bi-credit-card d-block fs-3 mb-2"></i>
+                  <span class="small">Manage Cards</span>
+                </button>
+              </div>
+              <div class="col-md-2 col-sm-4 col-6" *ngIf="canViewLoans">
+                <button class="btn btn-outline-danger w-100" (click)="navigateTo('/dashboard/loans')">
+                  <i class="bi bi-cash-stack d-block fs-3 mb-2"></i>
+                  <span class="small">Manage Loans</span>
+                </button>
+              </div>
+              <div class="col-md-2 col-sm-4 col-6" *ngIf="canViewDPS">
+                <button class="btn btn-outline-secondary w-100" (click)="navigateTo('/dashboard/dps')">
+                  <i class="bi bi-piggy-bank d-block fs-3 mb-2"></i>
+                  <span class="small">Manage DPS</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

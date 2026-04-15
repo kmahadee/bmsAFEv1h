@@ -1,0 +1,79 @@
+// Custom Variables
+$primary-gradient: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+$success-color: #1cc88a;
+$card-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+
+:host {
+  display: block;
+  background-color: #f8f9fc;
+  min-height: 100vh;
+}
+
+.card {
+  box-shadow: $card-shadow;
+  border-radius: 12px;
+}
+
+.bg-gradient-primary {
+  background: $primary-gradient;
+}
+
+.form-label {
+  font-size: 0.9rem;
+  color: #4e7e8a;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-control, .form-select {
+  border: 1px solid #d1d3e2;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  
+  &:focus {
+    border-color: #bac8f3;
+    box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.1);
+  }
+}
+
+.btn {
+  padding: 0.6rem 1.5rem;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+
+  &-primary {
+    background-color: #4e73df;
+    border: none;
+    &:hover {
+      background-color: #2e59d9;
+      transform: translateY(-1px);
+    }
+  }
+
+  &-success {
+    background-color: $success-color;
+    border: none;
+    &:hover {
+      background-color: darken($success-color, 10%);
+    }
+  }
+}
+
+.list-group-item {
+  border-color: #f1f1f1;
+}
+
+.badge {
+  font-weight: 500;
+}
+
+// Animation for step transition
+.confirmation-view {
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

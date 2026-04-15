@@ -1,0 +1,133 @@
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      
+      <div *ngIf="loadingLoan" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2 text-muted">Fetching loan details...</p>
+      </div>
+
+      <div *ngIf="!loadingLoan && loan" class="card shadow-sm border-0 overflow-hidden">
+        
+        <div class="card-header bg-gradient-primary text-white p-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h4 class="mb-1">Loan Repayment</h4>
+              <p class="mb-0 opacity-75">Loan ID: {{loanId}}</p>
+            </div>
+            <div class="badge bg-light text-primary fs-6 p-2 px-3">
+              {{loan.loanStatus}}
+            </div>
+          </div>
+        </div>
+
+        <div class="card-body p-4">
+          
+          <div *ngIf="errorMessage" class="alert alert-danger d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <div>{{errorMessage}}</div>
+          </div>
+          
+          <div *ngIf="successMessage" class="alert alert-success d-flex align-items-center" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <div>{{successMessage}}</div>
+          </div>
+
+          <div *ngIf="!confirmationStep && !successMessage">
+            <div class="row mb-4">
+              <div class="col-md-6">
+                <div class="p-3 bg-light rounded-3">
+                  <small class="text-muted d-block mb-1">Outstanding Balance</small>
+                  <h3 class="text-danger mb-0">{{formatCurrency(loan.outstandingBalance)}}</h3>
+                </div>
+              </div>
+              <div class="col-md-6 mt-3 mt-md-0">
+                <div class="p-3 bg-light rounded-3">
+                  <small class="text-muted d-block mb-1">Monthly EMI</small>
+                  <h3 class="text-primary mb-0">{{formatCurrency(loan.monthlyEMI)}}</h3>
+                </div>
+              </div>
+            </div>
+
+            <form [formGroup]="repaymentForm">
+              <div class="mb-4">
+                <label class="form-label fw-bold">Repayment Amount</label>
+                <div class="input-group mb-2">
+                  <span class="input-group-text">৳</span>
+                  <input type="number" formControlName="paymentAmount" class="form-control form-control-lg" 
+                         (input)="onPaymentAmountChange()" 
+                         [class.is-invalid]="isFieldInvalid('paymentAmount')">
+                </div>
+                <div class="d-flex gap-2">
+                  <button type="button" class="btn btn-sm btn-outline-secondary" (click)="setAmountToEMI()">Pay EMI</button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary" (click)="setAmountToFullOutstanding()">Pay Full Balance</button>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label fw-bold">Payment Mode</label>
+                  <select formControlName="paymentMode" class="form-select" [class.is-invalid]="isFieldInvalid('paymentMode')">
+                    <option *ngFor="let mode of paymentModes" [value]="mode">{{mode}}</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label fw-bold">Payment Date</label>
+                  <input type="date" formControlName="paymentDate" class="form-control" [class.is-invalid]="isFieldInvalid('paymentDate')">
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label fw-bold">Transaction Reference (Optional)</label>
+                <input type="text" formControlName="transactionReference" class="form-control" placeholder="e.g. UTR Number">
+              </div>
+
+              <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                <button type="button" class="btn btn-light px-4" (click)="cancel()">Cancel</button>
+                <button type="button" class="btn btn-primary px-5" (click)="proceedToConfirmation()">Review Payment</button>
+              </div>
+            </form>
+          </div>
+
+          <div *ngIf="confirmationStep && !successMessage" class="confirmation-view">
+            <h5 class="mb-4">Please confirm your payment details</h5>
+            
+            <div class="list-group list-group-flush mb-4 border rounded-3">
+              <div class="list-group-item d-flex justify-content-between py-3">
+                <span class="text-muted">Repayment Amount</span>
+                <span class="fw-bold">{{formatCurrency(repaymentForm.value.paymentAmount)}}</span>
+              </div>
+              <div class="list-group-item d-flex justify-content-between py-3">
+                <span class="text-muted">Penalty/Late Fees</span>
+                <span class="text-danger fw-bold">+ {{formatCurrency(penaltyAmount)}}</span>
+              </div>
+              <div class="list-group-item d-flex justify-content-between py-3 bg-light">
+                <span class="h6 mb-0">Total Payable</span>
+                <span class="h6 mb-0 text-primary">{{formatCurrency(totalPayableAmount)}}</span>
+              </div>
+              <div class="list-group-item d-flex justify-content-between py-3">
+                <span class="text-muted">Payment Mode</span>
+                <span class="badge bg-info text-dark">{{repaymentForm.value.paymentMode}}</span>
+              </div>
+            </div>
+
+            <div class="alert alert-info border-0 shadow-sm">
+              <small><i class="bi bi-info-circle-fill me-2"></i> Funds will be debited from your selected account once you click "Confirm & Pay".</small>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+              <button type="button" class="btn btn-outline-secondary px-4" (click)="backToForm()" [disabled]="loading">Back</button>
+              <button type="button" class="btn btn-success px-5" (click)="submitRepayment()" [disabled]="loading">
+                <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+                Confirm & Pay {{formatCurrency(totalPayableAmount)}}
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

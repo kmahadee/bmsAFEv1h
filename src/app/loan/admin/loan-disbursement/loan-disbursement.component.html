@@ -1,0 +1,155 @@
+<div class="container-fluid py-4">
+  <div *ngIf="loading" class="d-flex justify-content-center align-items-center min-vh-50">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading loan details...</span>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger border-0 shadow-sm d-flex align-items-center" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    <div>{{ error }}</div>
+    <button type="button" class="btn-close ms-auto" (click)="error = null"></button>
+  </div>
+
+  <div *ngIf="!loading && loan" class="row g-4">
+    <div class="col-12">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <div>
+          <button (click)="goBack()" class="btn btn-link text-decoration-none p-0 mb-2">
+            <i class="bi bi-arrow-left"></i> Back to Details
+          </button>
+          <h2 class="fw-bold mb-0">Disburse Loan</h2>
+          <p class="text-muted">Process disbursement for Application #{{loanId}}</p>
+        </div>
+        <span class="badge rounded-pill px-3 py-2" [ngClass]="loan.approvalStatus === 'APPROVED' ? 'bg-success-light text-success' : 'bg-warning-light text-warning'">
+          {{ loan.approvalStatus }}
+        </span>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm h-100 summary-card">
+        <div class="card-body p-4">
+          <h5 class="card-title fw-bold mb-4">Loan Summary</h5>
+          
+          <div class="mb-4">
+            <label class="small text-uppercase text-muted fw-semibold">Customer Name</label>
+            <p class="fs-5 fw-bold mb-0 text-dark">{{ loan.customerName }}</p>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-6">
+              <label class="small text-uppercase text-muted fw-semibold">Principal</label>
+              <p class="fw-bold text-primary">{{ formatAmount(loan.principal) }}</p>
+            </div>
+            <div class="col-6">
+              <label class="small text-uppercase text-muted fw-semibold">Interest Rate</label>
+              <p class="fw-bold text-dark">{{ loan.annualInterestRate }}% p.a.</p>
+            </div>
+            <div class="col-6">
+              <label class="small text-uppercase text-muted fw-semibold">Tenure</label>
+              <p class="fw-bold text-dark">{{ loan.tenureMonths }} Months</p>
+            </div>
+            <div class="col-6">
+              <label class="small text-uppercase text-muted fw-semibold">Disbursement Status</label>
+              <div class="mt-1">
+                <span class="badge" [ngClass]="'bg-' + (loan.disbursementStatus === 'PENDING' ? 'warning' : 'info')">
+                    {{ loan.disbursementStatus }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <hr class="my-4 opacity-10">
+
+          <div class="alert bg-light border-0 small">
+            <i class="bi bi-info-circle-fill text-primary me-2"></i>
+            Ensure all KYC documents are verified before proceeding with the final disbursement.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <form [formGroup]="disbursementForm">
+            <h5 class="fw-bold mb-4">Disbursement Details</h5>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Target Account <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text bg-white border-end-0"><i class="bi bi-bank"></i></span>
+                  <select class="form-select border-start-0" formControlName="accountNumber" (change)="onAccountChange()">
+                    <option value="" disabled>Select Account</option>
+                    <option *ngFor="let acc of customerAccounts" [value]="acc.accountNumber">
+                      {{ acc.accountNumber }} ({{ acc.accountType }})
+                    </option>
+                  </select>
+                </div>
+                <div *ngIf="disbursementForm.get('accountNumber')?.touched && disbursementForm.get('accountNumber')?.invalid" class="text-danger small mt-1">
+                  Please select a target account.
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Disbursement Amount <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text bg-white border-end-0">BDT</span>
+                  <input type="number" class="form-control border-start-0" formControlName="disbursementAmount" [max]="getMaxDisbursementAmount()">
+                </div>
+                <div class="form-text text-end">Max: {{ formatAmount(getMaxDisbursementAmount()) }}</div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Scheduled Date</label>
+                <input type="date" class="form-control" formControlName="scheduledDate">
+              </div>
+
+              <div class="col-md-12">
+                <label class="form-label fw-semibold">Bank Details/Notes</label>
+                <textarea class="form-control" rows="3" formControlName="bankDetails" placeholder="Add specific bank instructions or routing details..."></textarea>
+              </div>
+            </div>
+
+            <div class="mt-5 d-flex gap-2 justify-content-end">
+              <button type="button" class="btn btn-light px-4" (click)="goBack()">Cancel</button>
+              <button type="button" class="btn btn-primary px-5 py-2 shadow-sm fw-bold" 
+                      [disabled]="disbursementForm.invalid || !canDisburse()"
+                      (click)="openConfirmationModal()">
+                Process Disbursement
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop fade show" *ngIf="showConfirmationModal"></div>
+<div class="modal fade show d-block" *ngIf="showConfirmationModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-primary text-white border-0 py-3">
+        <h5 class="modal-title fw-bold">Confirm Disbursement</h5>
+        <button type="button" class="btn-close btn-close-white" (click)="closeConfirmationModal()"></button>
+      </div>
+      <div class="modal-body p-4 text-center">
+        <div class="display-1 text-warning mb-3">
+          <i class="bi bi-question-circle"></i>
+        </div>
+        <p class="fs-5">Are you sure you want to disburse <strong>{{ formatAmount(disbursementForm.value.disbursementAmount) }}</strong>?</p>
+        <p class="text-muted small">This action will transfer funds to account {{ disbursementForm.value.accountNumber }} and cannot be undone.</p>
+      </div>
+      <div class="modal-footer border-0 p-4 pt-0 justify-content-center">
+        <button type="button" class="btn btn-outline-secondary px-4" (click)="closeConfirmationModal()">Go Back</button>
+        <button type="button" class="btn btn-primary px-4" [disabled]="submitting" (click)="disburseLoan()">
+          <span *ngIf="submitting" class="spinner-border spinner-border-sm me-2"></span>
+          Confirm & Transfer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

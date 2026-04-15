@@ -1,0 +1,109 @@
+// Custom Variables
+$primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$success-gradient: linear-gradient(135deg, #2af598 0%, #009efd 100%);
+$info-gradient: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+
+.loan-details-container {
+  padding: 2rem 0;
+  background-color: #f8f9fa;
+
+  .card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease;
+    overflow: hidden;
+  }
+
+  .header-card {
+    background: $primary-gradient;
+    color: white;
+    .loan-id { opacity: 0.8; font-size: 0.9rem; }
+  }
+
+  .stat-card {
+    .icon-box {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+  }
+
+  // Vertical Timeline Styling
+  .timeline-wrapper {
+    position: relative;
+    padding-left: 3rem;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 0;
+      height: 100%;
+      width: 2px;
+      background: #e9ecef;
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 2rem;
+
+      .timeline-icon {
+        position: absolute;
+        left: -45px;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #dee2e6;
+        z-index: 2;
+        color: #6c757d;
+
+        &.completed {
+          background: #198754;
+          color: white;
+          border-color: #198754;
+        }
+        &.current {
+          background: #ffc107;
+          color: #000;
+          border-color: #ffc107;
+          box-shadow: 0 0 0 4px rgba(255, 193, 7, 0.2);
+        }
+      }
+
+      .timeline-date {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #adb5bd;
+        text-transform: uppercase;
+      }
+    }
+  }
+
+  .progress {
+    height: 10px;
+    border-radius: 5px;
+    background-color: #e9ecef;
+    .progress-bar {
+      background: $success-gradient;
+    }
+  }
+}
+
+.badge-soft {
+  padding: 0.5em 1em;
+  border-radius: 50rem;
+  &.bg-success { background-color: #d1e7dd !important; color: #0f5132 !important; }
+  &.bg-warning { background-color: #fff3cd !important; color: #664d03 !important; }
+  &.bg-danger { background-color: #f8d7da !important; color: #842029 !important; }
+  &.bg-primary { background-color: #cfe2ff !important; color: #084298 !important; }
+}

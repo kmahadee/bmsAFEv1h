@@ -1,0 +1,192 @@
+
+<div class="branch-list-container">
+  <div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h2 class="mb-0">
+              <i class="bi bi-building text-primary me-2"></i>
+              Branch Management
+            </h2>
+            <p class="text-muted mb-0">Manage all bank branches</p>
+          </div>
+          <button class="btn btn-primary" (click)="createBranch()">
+            <i class="bi bi-plus-circle me-2"></i>
+            Add Branch
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-body">
+            <h6 class="text-muted mb-2">Total Branches</h6>
+            <h3 class="mb-0">{{ branches.length }}</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-body">
+            <h6 class="text-muted mb-2">Active Branches</h6>
+            <h3 class="mb-0 text-success">
+              <!-- {{ (branches.filter(b => b.status === 'active')).length }} -->
+            </h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-body">
+            <h6 class="text-muted mb-2">Cities Covered</h6>
+            <h3 class="mb-0 text-info">{{ cities.length }}</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">Search</label>
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Search by name, code, IFSC..."
+                [(ngModel)]="searchTerm"
+                (keyup.enter)="onSearch()"
+              />
+              <button class="btn btn-outline-primary" (click)="onSearch()">
+                <i class="bi bi-search"></i>
+              </button>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Status</label>
+            <select class="form-select" [(ngModel)]="selectedStatus" (change)="onStatusChange()">
+              <option value="all">All Status</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="under_maintenance">Under Maintenance</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">City</label>
+            <select class="form-select" [(ngModel)]="selectedCity" (change)="onCityChange()">
+              <option value="all">All Cities</option>
+              <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
+            </select>
+          </div>
+          <div class="col-md-2 d-flex align-items-end">
+            <button class="btn btn-outline-secondary w-100" (click)="loadBranches()">
+              <i class="bi bi-arrow-clockwise me-2"></i>
+              Refresh
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <app-loading-spinner *ngIf="loading" message="Loading branches..."></app-loading-spinner>
+
+    <!-- Branches Table -->
+    <div class="card" *ngIf="!loading">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Branch Code</th>
+                <th>Branch Name</th>
+                <th>IFSC Code</th>
+                <th>Location</th>
+                <th>Manager</th>
+                <th>Contact</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let branch of filteredBranches">
+                <td>
+                  <strong>{{ branch.branchCode }}</strong>
+                  <span *ngIf="branch.isMainBranch" class="badge bg-warning ms-2">Main</span>
+                </td>
+                <td>{{ branch.branchName }}</td>
+                <td><code>{{ branch.ifscCode }}</code></td>
+                <td>
+                  <div>{{ branch.city }}, {{ branch.state }}</div>
+                  <small class="text-muted">{{ branch.zipCode }}</small>
+                </td>
+                <td>
+                  <div *ngIf="branch.managerName">{{ branch.managerName }}</div>
+                  <small class="text-muted" *ngIf="!branch.managerName">Not assigned</small>
+                </td>
+                <td>
+                  <div><small>{{ branch.phone }}</small></div>
+                  <div><small>{{ branch.email }}</small></div>
+                </td>
+                <td>
+                  <span class="badge" [ngClass]="{
+                    'bg-success': branch.status === 'active',
+                    'bg-danger': branch.status === 'inactive',
+                    'bg-warning': branch.status === 'under_maintenance'
+                  }">
+                    {{ branch.status }}
+                  </span>
+                </td>
+                <td>
+                  <div class="btn-group btn-group-sm">
+                    <button 
+                      class="btn btn-outline-primary" 
+                      (click)="viewBranch(branch.id)"
+                      title="View Details"
+                    >
+                      <i class="bi bi-eye"></i>
+                    </button>
+                    <button 
+                      class="btn btn-outline-warning" 
+                      (click)="editBranch(branch.id)"
+                      title="Edit"
+                    >
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <button 
+                      class="btn btn-outline-danger" 
+                      (click)="deleteBranch(branch.id)"
+                      title="Delete"
+                    >
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="filteredBranches.length === 0">
+                <td colspan="8" class="text-center text-muted py-4">
+                  <i class="bi bi-inbox d-block mb-2" style="font-size: 3rem;"></i>
+                  No branches found
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card-footer bg-white">
+        <div class="d-flex justify-content-between align-items-center">
+          <span class="text-muted">
+            Showing {{ filteredBranches.length }} of {{ branches.length }} branches
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

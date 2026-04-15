@@ -1,0 +1,99 @@
+<div class="loan-filter card shadow-sm">
+  <div class="card-header bg-light">
+    <div class="d-flex justify-content-between align-items-center">
+      <h6 class="mb-0">
+        <i class="bi bi-funnel me-2"></i>
+        Filter Loans
+      </h6>
+      <button 
+        type="button" 
+        class="btn btn-sm btn-link text-decoration-none"
+        (click)="toggleAdvancedFilters()">
+        <i [class]="showAdvancedFilters ? 'bi bi-chevron-up' : 'bi bi-chevron-down'"></i>
+        {{ showAdvancedFilters ? 'Less' : 'More' }} Filters
+      </button>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <form [formGroup]="filterForm">
+      <!-- Basic Filters -->
+      <div class="row g-3">
+        <!-- Loan Type -->
+        <div class="col-md-4">
+          <label for="loanType" class="form-label small">Loan Type</label>
+          <select 
+            id="loanType" 
+            class="form-select form-select-sm"
+            formControlName="loanType">
+            <option value="">All Types</option>
+            <option *ngFor="let type of loanTypes" [value]="type.value">
+              {{ type.label }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Loan Status -->
+        <div class="col-md-4">
+          <label for="loanStatus" class="form-label small">Status</label>
+          <select 
+            id="loanStatus" 
+            class="form-select form-select-sm"
+            formControlName="loanStatus">
+            <option value="">All Statuses</option>
+            <option *ngFor="let status of loanStatuses" [value]="status.value">
+              {{ status.label }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Page Size -->
+        <div class="col-md-4">
+          <label for="pageSize" class="form-label small">Results per page</label>
+          <select 
+            id="pageSize" 
+            class="form-select form-select-sm"
+            formControlName="pageSize">
+            <option [value]="10">10</option>
+            <option [value]="20">20</option>
+            <option [value]="50">50</option>
+            <option [value]="100">100</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Advanced Filters -->
+      <div class="advanced-filters mt-3" *ngIf="showAdvancedFilters" [@slideDown]>
+        <hr>
+        <div class="row g-3">
+          <!-- Customer ID -->
+          <div class="col-md-6">
+            <label for="customerId" class="form-label small">Customer ID</label>
+            <input 
+              type="text" 
+              id="customerId" 
+              class="form-control form-control-sm"
+              formControlName="customerId"
+              placeholder="Enter customer ID">
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="d-flex justify-content-end gap-2 mt-3">
+        <button 
+          type="button" 
+          class="btn btn-sm btn-outline-secondary"
+          (click)="resetFilters()"
+          [disabled]="!hasActiveFilters()">
+          <i class="bi bi-x-circle me-1"></i>
+          Reset
+        </button>
+        <span class="badge bg-primary d-flex align-items-center" *ngIf="hasActiveFilters()">
+          <i class="bi bi-funnel-fill me-1"></i>
+          Filters Active
+        </span>
+      </div>
+    </form>
+  </div>
+</div>

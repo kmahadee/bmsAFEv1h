@@ -1,0 +1,38 @@
+.emi-calculator {
+  .card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+
+  .result-card {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    border-left: 4px solid #007bff;
+  }
+
+  .summary-box {
+    transition: transform 0.2s;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  .progress {
+    border-radius: 15px;
+    overflow: hidden;
+    
+    .progress-bar {
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+  }
+
+  .table {
+    font-size: 0.9rem;
+    
+    th {
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+  }
+}

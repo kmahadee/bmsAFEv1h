@@ -1,0 +1,273 @@
+
+<div class="container-fluid py-4">
+  <!-- Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <h2 class="mb-0">
+        <i class="bi bi-credit-card text-primary me-2"></i>
+        My Cards
+      </h2>
+      <p class="text-muted mb-0">Manage your debit and credit cards</p>
+    </div>
+  </div>
+
+  <!-- Success Alert -->
+  <div *ngIf="success" class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="bi bi-check-circle me-2"></i>
+    {{ success }}
+    <button type="button" class="btn-close" (click)="success = null"></button>
+  </div>
+
+  <!-- Error Alert -->
+  <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    {{ error }}
+    <button type="button" class="btn-close" (click)="error = null"></button>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="loading && cards.length === 0" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="text-muted mt-2">Loading your cards...</p>
+  </div>
+
+  <!-- Cards Grid -->
+  <div *ngIf="!loading || cards.length > 0" class="row">
+    <div *ngFor="let card of cards" class="col-lg-6 col-xl-4 mb-4">
+      <div class="card border-0 shadow-sm h-100 card-hover">
+        <!-- Card Visual -->
+        <div class="card-body card-visual" [ngClass]="{
+          'bg-gradient-primary': card.cardType === 'debit_card',
+          'bg-gradient-success': card.cardType === 'credit_card',
+          'bg-gradient-info': card.cardType === 'prepaid_card'
+        }">
+          <div class="d-flex justify-content-between align-items-start mb-4">
+            <span class="badge" [ngClass]="getCardTypeBadge(card.cardType)">
+              {{ formatType(card.cardType) }}
+            </span>
+            <span *ngIf="card.isInternational" class="text-white">
+              <i class="bi bi-globe fs-4"></i>
+            </span>
+          </div>
+          
+          <div class="mb-4">
+            <div class="card-chip mb-3">
+              <i class="bi bi-sim"></i>
+            </div>
+            <h4 class="text-white mb-1 font-monospace">{{ card.maskedCardNumber }}</h4>
+          </div>
+          
+          <div class="d-flex justify-content-between align-items-end">
+            <div>
+              <small class="text-white-50">CARD HOLDER</small>
+              <div class="text-white fw-bold text-uppercase">{{ card.cardHolderName }}</div>
+            </div>
+            <div class="text-end">
+              <small class="text-white-50">EXPIRES</small>
+              <div class="text-white fw-bold">{{ formatDate(card.expiryDate) }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card Info -->
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="badge" [ngClass]="getStatusBadge(card.status)">
+              {{ card.status | uppercase }}
+            </span>
+            <span *ngIf="isExpiringSoon(card.expiryDate)" class="badge bg-warning text-dark">
+              <i class="bi bi-exclamation-triangle"></i> Expiring Soon
+            </span>
+          </div>
+
+          <div *ngIf="card.creditLimit" class="mb-3">
+            <div class="d-flex justify-content-between mb-1">
+              <small class="text-muted">Credit Limit</small>
+              <small class="fw-bold">${{ card.creditLimit | number:'1.2-2' }}</small>
+            </div>
+            <div class="d-flex justify-content-between">
+              <small class="text-muted">Available</small>
+              <small class="fw-bold text-success">${{ card.availableLimit | number:'1.2-2' }}</small>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <small class="text-muted d-block">Account: {{ card.accountNumber }}</small>
+            <small class="text-muted d-block">Customer ID: {{ card.customerId }}</small>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="d-grid gap-2">
+            <button 
+              class="btn btn-sm btn-outline-primary"
+              (click)="viewCardDetails(card.id)">
+              <i class="bi bi-eye me-1"></i>View Details
+            </button>
+            
+            <div class="btn-group">
+              <button 
+                *ngIf="canActivate(card)"
+                class="btn btn-sm btn-success"
+                (click)="activateCard(card)"
+                [disabled]="loading">
+                <i class="bi bi-check-circle me-1"></i>Activate
+              </button>
+              
+              <button 
+                *ngIf="canUpdatePin(card)"
+                class="btn btn-sm btn-outline-secondary"
+                (click)="openPinModal(card)"
+                [disabled]="loading">
+                <i class="bi bi-key me-1"></i>Change PIN
+              </button>
+              
+              <button 
+                *ngIf="canBlock(card)"
+                class="btn btn-sm btn-outline-danger"
+                (click)="openBlockModal(card)"
+                [disabled]="loading">
+                <i class="bi bi-lock me-1"></i>Block Card
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Cards Message -->
+    <div *ngIf="cards.length === 0 && !loading" class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body text-center py-5">
+          <i class="bi bi-credit-card display-1 text-muted"></i>
+          <h4 class="mt-3">No Cards Found</h4>
+          <p class="text-muted">You don't have any cards yet. Contact your branch to issue a new card.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Block Card Modal -->
+<div class="modal fade" id="blockModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Block Card</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="selectedCard" class="alert alert-warning">
+          <strong>{{ selectedCard.maskedCardNumber }}</strong><br>
+          {{ selectedCard.cardHolderName }}
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Reason for Blocking *</label>
+          <select class="form-select mb-2" [(ngModel)]="blockReason">
+            <option value="">-- Select a Reason --</option>
+            <option value="Lost card">Lost card</option>
+            <option value="Stolen card">Stolen card</option>
+            <option value="Suspicious activity">Suspicious activity</option>
+            <option value="Temporary hold">Temporary hold</option>
+            <option value="Other">Other</option>
+          </select>
+          <textarea 
+            *ngIf="blockReason === 'Other'"
+            class="form-control" 
+            rows="2" 
+            [(ngModel)]="blockReason"
+            placeholder="Please specify the reason..."></textarea>
+        </div>
+        <p class="text-danger small mb-0">
+          <i class="bi bi-exclamation-triangle me-1"></i>
+          You will need to contact customer support to unblock this card.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button 
+          type="button" 
+          class="btn btn-danger" 
+          (click)="confirmBlock()"
+          [disabled]="!blockReason.trim() || loading">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+          <i *ngIf="!loading" class="bi bi-lock me-2"></i>Block Card
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Change PIN Modal -->
+<div class="modal fade" id="pinModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Change PIN</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="selectedCard" class="alert alert-info">
+          <strong>{{ selectedCard.maskedCardNumber }}</strong><br>
+          {{ selectedCard.cardHolderName }}
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label">Current PIN *</label>
+          <input 
+            type="password" 
+            class="form-control" 
+            [(ngModel)]="oldPin"
+            maxlength="4"
+            pattern="\d{4}"
+            placeholder="Enter current 4-digit PIN">
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label">New PIN *</label>
+          <input 
+            type="password" 
+            class="form-control" 
+            [(ngModel)]="newPin"
+            maxlength="4"
+            pattern="\d{4}"
+            placeholder="Enter new 4-digit PIN">
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label">Confirm New PIN *</label>
+          <input 
+            type="password" 
+            class="form-control" 
+            [(ngModel)]="confirmPin"
+            maxlength="4"
+            pattern="\d{4}"
+            placeholder="Re-enter new PIN">
+        </div>
+
+        <div *ngIf="error" class="alert alert-danger py-2">
+          {{ error }}
+        </div>
+
+        <div class="alert alert-warning py-2">
+          <small>
+            <i class="bi bi-info-circle me-1"></i>
+            PIN must be exactly 4 digits and different from your current PIN.
+          </small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button 
+          type="button" 
+          class="btn btn-primary" 
+          (click)="confirmPinUpdate()"
+          [disabled]="!oldPin || !newPin || !confirmPin || loading">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+          <i *ngIf="!loading" class="bi bi-check-circle me-2"></i>Update PIN
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

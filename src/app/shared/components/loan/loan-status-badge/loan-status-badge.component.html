@@ -1,0 +1,4 @@
+<span [ngClass]="getBadgeClass()">
+  <i *ngIf="showIcon" [class]="'bi ' + getIcon() + ' me-1'" style="font-size: 0.8em;"></i>
+  {{ getStatusLabel() }}
+</span>

@@ -1,0 +1,155 @@
+<div class="loan-details-container container-fluid">
+  
+  <div *ngIf="loading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="mt-2 text-muted">Fetching loan details...</p>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger mx-3" role="alert">
+    <i class="bi bi-exclamation-octagon me-2"></i> {{ errorMessage }}
+    <button (click)="refresh()" class="btn btn-sm btn-outline-danger float-end">Retry</button>
+  </div>
+
+  <div *ngIf="loan && !loading" class="row g-4 px-3">
+    
+    <div class="col-12">
+      <div class="card header-card p-4">
+        <div class="d-md-flex justify-content-between align-items-center">
+          <div>
+            <span class="loan-id text-uppercase">Loan ID: #{{loanId}}</span>
+            <h2 class="mb-0 fw-bold">{{ loan.loanType | titlecase }}</h2>
+            <p class="mb-0 mt-1"><i class="bi bi-calendar-event me-2"></i>Applied on {{ loan.applicationDate | date:'mediumDate' }}</p>
+          </div>
+          <div class="mt-3 mt-md-0">
+            <button (click)="goBack()" class="btn btn-light btn-sm me-2">
+              <i class="bi bi-arrow-left me-1"></i> Back
+            </button>
+            <button (click)="refresh()" class="btn btn-white-outline btn-sm">
+              <i class="bi bi-arrow-clockwise"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card stat-card p-3 h-100">
+        <div class="icon-box bg-primary text-white"><i class="bi bi-bank"></i></div>
+        <small class="text-muted text-uppercase fw-bold">Principal Amount</small>
+        <h3 class="fw-bold text-primary">{{ formatCurrency(loan.principal) }}</h3>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card stat-card p-3 h-100">
+        <div class="icon-box bg-warning text-dark"><i class="bi bi-percent"></i></div>
+        <small class="text-muted text-uppercase fw-bold">Interest Rate</small>
+        <h3 class="fw-bold">{{ loan.annualInterestRate }}% <small class="fs-6">p.a.</small></h3>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card stat-card p-3 h-100">
+        <div class="icon-box bg-info text-white"><i class="bi bi- cash-stack"></i></div>
+        <small class="text-muted text-uppercase fw-bold">EMI Amount</small>
+        <h3 class="fw-bold">{{ formatCurrency(loan.monthlyEMI) }}</h3>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card stat-card p-3 h-100">
+        <div class="icon-box bg-danger text-white"><i class="bi bi-wallet2"></i></div>
+        <small class="text-muted text-uppercase fw-bold">Outstanding</small>
+        <h3 class="fw-bold text-danger">{{ formatCurrency(loan.outstandingBalance) }}</h3>
+      </div>
+    </div>
+
+    <div class="col-12" *ngIf="loan.loanStatus === 'ACTIVE'">
+      <div class="card p-4">
+        <div class="d-flex justify-content-between mb-2">
+          <span class="fw-bold">Repayment Progress</span>
+          <span class="fw-bold text-primary">{{ getProgress() }}% Paid</span>
+        </div>
+        <div class="progress">
+          <div class="progress-bar progress-bar-striped progress-bar-animated" 
+               role="progressbar" [style.width.%]="getProgress()"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-8">
+      <div class="card h-100">
+        <div class="card-header bg-white py-3">
+          <h5 class="mb-0 fw-bold"><i class="bi bi-info-circle me-2 text-primary"></i>Loan Specifics</h5>
+        </div>
+        <div class="card-body">
+          <div class="row g-4">
+            <div class="col-sm-6">
+              <label class="text-muted d-block small">Account Number</label>
+              <span class="fw-bold">{{ loan.accountNumber }}</span>
+            </div>
+            <div class="col-sm-6">
+              <label class="text-muted d-block small">Tenure</label>
+              <span class="fw-bold">{{ loan.tenureMonths }} Months</span>
+            </div>
+            <div class="col-sm-6">
+              <label class="text-muted d-block small">Approval Status</label>
+              <span class="badge badge-soft" [ngClass]="{
+                'bg-success': loan.approvalStatus === 'APPROVED',
+                'bg-warning': loan.approvalStatus === 'PENDING',
+                'bg-danger': loan.approvalStatus === 'REJECTED'
+              }">{{ loan.approvalStatus }}</span>
+            </div>
+            <div class="col-sm-6">
+              <label class="text-muted d-block small">Disbursement Status</label>
+              <span class="badge badge-soft bg-primary">{{ loan.disbursementStatus }}</span>
+            </div>
+
+            <div class="col-12" *ngIf="isSecuredLoan()">
+              <hr class="text-muted">
+              <p class="text-primary fw-bold small"><i class="bi bi-shield-check me-1"></i> ASSET DETAILS</p>
+              <div class="p-3 bg-light rounded">
+                 Asset linked to this loan is currently under lien.
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-5 pt-3 border-top d-flex flex-wrap gap-2">
+            <button *ngIf="canMakePayment" (click)="makePayment()" class="btn btn-success px-4 shadow-sm">
+              <i class="bi bi-credit-card me-2"></i>Pay EMI
+            </button>
+            <button (click)="viewStatement()" class="btn btn-outline-primary shadow-sm">
+              <i class="bi bi-file-earmark-pdf me-2"></i>Statement
+            </button>
+            <button *ngIf="canApprove" (click)="approveLoan()" class="btn btn-warning shadow-sm">
+              <i class="bi bi-pencil-square me-2"></i>Review Application
+            </button>
+            <button *ngIf="canDisburse" (click)="disburseLoan()" class="btn btn-info text-white shadow-sm">
+              <i class="bi bi-send-check me-2"></i>Disburse Funds
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card h-100">
+        <div class="card-header bg-white py-3">
+          <h5 class="mb-0 fw-bold"><i class="bi bi-clock-history me-2 text-primary"></i>Timeline</h5>
+        </div>
+        <div class="card-body">
+          <div class="timeline-wrapper">
+            <div class="timeline-item" *ngFor="let event of timeline">
+              <div class="timeline-icon" [ngClass]="event.status">
+                <i class="bi" [ngClass]="event.icon"></i>
+              </div>
+              <div class="timeline-content">
+                <div class="timeline-date">{{ event.date | date:'mediumDate' }}</div>
+                <h6 class="fw-bold mb-1">{{ event.title }}</h6>
+                <p class="text-muted small mb-0">{{ event.description }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
